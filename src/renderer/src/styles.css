@@ -807,3 +807,11 @@ pre {
   border-radius: 3px;
   background: var(--concrete);
 }
+
+.select-all {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 8px 0;
+  color: var(--muted);
+}

@@ -4,6 +4,7 @@ import type { Finding, Inventory, Scenario } from '../../shared/types'
 import type { Runtime } from '../runtime/types'
 import { runAgent } from './runAgent'
 import { APP_TOOLS, appToolsServer } from './runtimeTools'
+import { GRAPH_TOOLS, graphServer } from './graphTools'
 
 export interface SweepVerdict {
   status: 'passed' | 'broken' | 'skipped'
@@ -25,7 +26,8 @@ Rules:
 - "passed" means you saw it work. If the app behaves differently from the expected result, it is "broken".
   If a step needs something you do not have (a real third-party reply, a paid plan, a device), it is "skipped" —
   say exactly why. Never call a skipped scenario passed.
-- If broken: find the cause in the source code (cite file:line), and write a minimal suggested fix as a unified diff.
+- If broken: find the cause in the source code (cite file:line) — the graph tools find handlers, callers and
+  blast radius fastest — and write a minimal suggested fix as a unified diff.
   Do not edit any files.
 - Keep each run short and focused on this one scenario.`
 
@@ -73,6 +75,7 @@ export async function runScenario(opts: {
 }): Promise<SweepVerdict> {
   const s = opts.scenario
   const outputDir = join(opts.localWorkdir, '.crashtest', 'shots', s.id)
+  const graph = await graphServer(opts.localWorkdir)
   const res = await runAgent<SweepVerdict>({
     projectId: opts.projectId,
     cwd: opts.localWorkdir,
@@ -83,8 +86,8 @@ export async function runScenario(opts: {
       `Scenario ${s.id} [${s.priority}] — ${s.title}\nWho: ${s.who}\nStarting state: ${s.startingState}\n` +
       `Steps:\n${s.steps.map((x, i) => `${i + 1}. ${x}`).join('\n')}\nExpected: ${s.expected}\n\n` +
       `Save screenshots into ${outputDir}. Run it now and report the verdict.`,
-    allowedTools: ['Read', 'Grep', 'Glob', 'mcp__playwright', ...APP_TOOLS],
-    mcpServers: { ...playwrightServer(outputDir), ...(await appToolsServer(opts.runtime)) },
+    allowedTools: ['Read', 'Grep', 'Glob', 'mcp__playwright', ...APP_TOOLS, ...(Object.keys(graph).length ? GRAPH_TOOLS : [])],
+    mcpServers: { ...playwrightServer(outputDir), ...(await appToolsServer(opts.runtime)), ...graph },
     schema: SCHEMA,
     maxTurns: 40,
     signal: opts.signal

@@ -82,7 +82,7 @@ export default function ScenariosView({ project }: { project: Project }): React.
           )}
         </div>
         <div className="table-wrap">
-          <label className="row" style={{ cursor: 'default', borderTop: 0, color: 'var(--muted)' }}>
+          <label className="select-all">
             <input
               type="checkbox"
               checked={allVisibleSelected}
