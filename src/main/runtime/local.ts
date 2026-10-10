@@ -1,5 +1,5 @@
 import { spawn } from 'child_process'
-import { mkdirSync, openSync, readFileSync, existsSync } from 'fs'
+import { mkdirSync, openSync, readFileSync, existsSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import type { BackgroundProcess, Runtime, ShellResult } from './types'
 import { tail } from './types'
@@ -54,6 +54,7 @@ export function createLocalRuntime(appDir: string, env: Record<string, string>):
         stdio: ['ignore', fd, fd]
       })
       child.unref()
+      if (child.pid) writeFileSync(join(appDir, '.crashtest', `${name}.pid`), String(child.pid))
       const proc = { name, command, logFile, pid: child.pid ?? -1 }
       procs.push(proc)
       return proc

@@ -81,9 +81,6 @@ app.on('before-quit', (event) => {
     })
 })
 
-// A terminal kill (SIGTERM/SIGINT) goes through the same quit path, so what the agent started is stopped.
-for (const sig of ['SIGTERM', 'SIGINT'] as const) process.on(sig, () => app.quit())
-
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })

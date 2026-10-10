@@ -8,6 +8,7 @@ import { postMessage, publishProject } from '../events'
 import type { Runtime } from '../runtime/types'
 import { createLocalRuntime } from '../runtime/local'
 import { createSshRuntime, testSsh, type SshTarget } from '../runtime/ssh'
+import { reapStale } from '../runtime/reap'
 import { ask, guard, isBusy } from './orchestrator'
 import { bootApp, type BootResult } from './bootstrap'
 import { runScenario } from './sweep'
@@ -34,7 +35,11 @@ async function chooseTarget(project: Project): Promise<RunTarget> {
 
 async function openRuntime(project: Project, target: RunTarget): Promise<Runtime | undefined> {
   const env = getProjectEnv(project.id)
-  if (target === 'local') return createLocalRuntime(project.workdir, env)
+  if (target === 'local') {
+    const local = createLocalRuntime(project.workdir, env)
+    await reapLeftovers(project, local)
+    return local
+  }
 
   const ssh = sshTarget()
   postMessage(
@@ -53,6 +58,7 @@ async function openRuntime(project: Project, target: RunTarget): Promise<Runtime
   }
   const appDir = `~/crashtest/${project.name.replace(/[^\w.-]+/g, '-').replace(/^-+|-+$/g, '')}`
   const runtime = await createSshRuntime(ssh, appDir, env)
+  await reapLeftovers(project, runtime)
   postMessage(
     project.id,
     'activity',
@@ -73,6 +79,11 @@ async function openRuntime(project: Project, target: RunTarget): Promise<Runtime
     )
   }
   return runtime
+}
+
+async function reapLeftovers(project: Project, runtime: Runtime): Promise<void> {
+  const n = await reapStale(runtime)
+  if (n) postMessage(project.id, 'activity', `Stopped ${n} processes an earlier run left behind`)
 }
 
 async function isUp(url: string): Promise<boolean> {
