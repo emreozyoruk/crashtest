@@ -23,7 +23,7 @@ neatlogs' head of product engineering ([the ask](https://x.com/kurokotetsuyami/s
 
 ## Verified findings
 
-Bugs 1–5 come from the 78 core scenarios; bugs 6–15 from the run of the remaining scenarios, which is still going.
+Bugs 1–5 come from the 78 core scenarios; bugs 6–16 from the run of the remaining scenarios, which is still going.
 
 ### 1. A JSON OTLP body with a non-array `resourceSpans` is accepted and silently dropped (S-047)
 - **Do:** `POST /v1/traces` with `Content-Type: application/json` and `{"resourceSpans": "oops"}`.
@@ -171,6 +171,15 @@ Bugs 1–5 come from the 78 core scenarios; bugs 6–15 from the run of the rema
 - **Why:** the `Replays` constructor (`replay/replay.ts:87-89`) only creates its table; there is no startup pass over
   replays left in `running`, unlike the checks, which resume after a restart.
 - **Fix:** on startup, mark replays still `running` as `failed` with "interrupted by a restart".
+
+### 16. Double-clicking Install starts Laya twice (S-381)
+- **Do:** with Laya not installed, click Install twice quickly (or call `ensure({install:true})` twice).
+- **Actual:** one neatroots process spawned two `laya-serve` processes in the same second, each holding ~0.9 GB. On
+  our 2 GB test server that pushed the machine 2 GB into swap; we watched it happen live.
+- **Why:** `models/laya.ts:101` checks for `starting`/`running` before the install, the install itself is
+  single-flight (`this.installing ??=`, `laya.ts:117`), and when it resolves both callers continue to
+  `await this.start()` (`laya.ts:120`), which spawns a server each time.
+- **Fix:** make `start()` single-flight like the install, or re-check the state after awaiting the install.
 
 ## Gap
 - **Runs can be deleted only through the API (S-092).** `DELETE /api/runs/:traceId` exists
