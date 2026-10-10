@@ -11,6 +11,7 @@ import { createSshRuntime, testSsh, type SshTarget } from '../runtime/ssh'
 import { ask, guard, isBusy } from './orchestrator'
 import { bootApp, type BootResult } from './bootstrap'
 import { runScenario } from './sweep'
+import { unsafeCommand } from './runtimeTools'
 import { findingsMarkdown, findingsSummary } from './report'
 
 // Start → choose Local/VDS → boot the app → run each scenario → recover if the app dies → report.
@@ -103,7 +104,12 @@ async function teardown(projectId: string): Promise<void> {
   const entry = live.get(projectId)
   if (!entry) return
   live.delete(projectId)
-  for (const cmd of entry.cleanup) await entry.runtime.run(cmd, 30_000).catch(() => undefined)
+  // Cleanup commands come from the agent, so they pass the same guard as its shell. Processes it
+  // started with start_background are stopped by dispose() anyway; name-matched kills are skipped.
+  for (const cmd of entry.cleanup) {
+    if (unsafeCommand(cmd)) continue
+    await entry.runtime.run(cmd, 30_000).catch(() => undefined)
+  }
   await entry.runtime.dispose()
 }
 

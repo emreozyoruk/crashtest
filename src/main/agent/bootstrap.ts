@@ -32,7 +32,8 @@ How to work:
 8. Everything you start must be stoppable by Crashtest. Run databases and services in the FOREGROUND through
    start_background (e.g. "postgres -D .crashtest/pg -p 5544", "redis-server --port 6390"), never as daemons
    (no pg_ctl start, brew services, docker run -d). Keep data directories inside .crashtest/ in the project folder.
-   If you could not avoid starting something detached, put the exact commands that stop it in cleanup.
+   If you could not avoid starting something detached, put the exact commands that stop it in cleanup
+   (e.g. "pg_ctl stop -D .crashtest/pg"). Never pkill/killall: processes from start_background are stopped for you.
 
 Return baseUrl = the URL the browser should open (from expose_port) and apiUrl = the API base URL if separate.`
 
