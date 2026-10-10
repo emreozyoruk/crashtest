@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "9b3a7c3548e1",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "README.md",
+    "docs/evidence/findings-kutt-p1.md",
+    "docs/evidence/findings-kutt.md",
+    "docs/evidence/kutt-p1-scenarios.png",
+    "hackathon.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/9b/3a7c3548e1/0/metadata.json",
+      "transcript": "/9b/3a7c3548e1/0/full.jsonl",
+      "compact_transcript": "/9b/3a7c3548e1/0/transcript.jsonl",
+      "content_hash": "/9b/3a7c3548e1/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 4,
+    "cache_creation_tokens": 2618,
+    "cache_read_tokens": 1022632,
+    "output_tokens": 2613,
+    "api_call_count": 2
+  }
+}
