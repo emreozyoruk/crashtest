@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { Priority, Project, Scenario, ScenarioStatus } from '../../../shared/types'
-import { isWorking } from '../App'
+import { isWorking } from '../working'
 import Marker from './Marker'
 import ScenarioDetail from './ScenarioDetail'
 

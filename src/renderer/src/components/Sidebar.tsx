@@ -1,6 +1,6 @@
 import type { Project } from '../../../shared/types'
 import type { View } from '../App'
-import { isWorking } from '../App'
+import { isWorking } from '../working'
 import Marker from './Marker'
 
 const PHASE_LABEL: Record<Project['phase'], string> = {

@@ -7,9 +7,6 @@ import SettingsView from './components/SettingsView'
 
 export type View = 'chat' | 'scenarios' | 'settings'
 
-const BUSY_PHASES = new Set(['cloning', 'inventory', 'scenarios', 'bootstrapping', 'sweeping'])
-export const isWorking = (p?: Project): boolean => Boolean(p && BUSY_PHASES.has(p.phase))
-
 function App(): React.JSX.Element {
   const [projects, setProjects] = useState<Project[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)

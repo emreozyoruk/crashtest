@@ -15,12 +15,14 @@ function Diff({ text }: { text: string }): React.JSX.Element {
 }
 
 export default function ScenarioDetail({ project, scenario: s, onClose }: { project: Project; scenario: Scenario; onClose: () => void }): React.JSX.Element {
-  const [shot, setShot] = useState<string | null>(null)
+  // Keyed by screenshot path so a stale image never shows while the next one loads.
+  const shotPath = s.finding?.screenshot
+  const [loaded, setLoaded] = useState<{ path: string; data: string | null } | null>(null)
+  const shot = loaded && loaded.path === shotPath ? loaded.data : null
 
   useEffect(() => {
-    setShot(null)
-    if (s.finding?.screenshot) void window.api.imageData(project.id, s.finding.screenshot).then(setShot)
-  }, [project.id, s.finding?.screenshot])
+    if (shotPath) void window.api.imageData(project.id, shotPath).then((data) => setLoaded({ path: shotPath, data }))
+  }, [project.id, shotPath])
 
   return (
     <aside className="detail" aria-label={`Scenario ${s.id}`}>

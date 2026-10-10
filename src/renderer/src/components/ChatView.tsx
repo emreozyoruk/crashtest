@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChatMessage, Project } from '../../../shared/types'
-import { isWorking } from '../App'
+import { isWorking } from '../working'
 import Markdown from './Markdown'
 import Marker from './Marker'
 
