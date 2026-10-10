@@ -59,6 +59,19 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - Root cause: the scenario model (Haiku) returned one draft without its `expected` field. The JSON schema asks for it, but the API does not enforce it, and `SCENARIOS.md` generation called `.replace` on it. The crash happened after the traced `scenario-generation` workflow returned, so neatlogs showed that trace (`8e3ab8e1…`) as a success — the failure lived in our own code, outside the span.
 - Fix: every draft is validated. Drafts without a title or an expected result are dropped; the other fields get safe defaults. Re-run on the same repo: **294 scenarios across 9 journeys (114 P1 · 128 P2 · 52 P3) in 143 s**, no error.
 
+### 2026-10-10 (Sat) — 01:26–02:18 PDT — every P1 scenario on Conduit
+- All 114 P1 scenarios in one run, app booted from scratch by the agent: **✅ 80 · ❌ 33 · ⏭ 1 in 52 minutes.**
+- Worst finding, checked by hand in the source: saving settings with a blank password replaces the user's password (`controllers/user.js:36`, `||` where `&&` was meant). Also: any bad or expired token → 500 instead of 401, tokens never expire or get revoked, duplicate usernames accepted.
+- Many ❌ shared one defect (nine bad-token scenarios, one auth middleware). New feature from that: the run summary groups broken scenarios by the file their root cause names (33 → 12 files) and Crashtest writes a `FINDINGS.md` report with every diff. Verified with a 3-scenario run in the built app.
+
+### 2026-10-10 (Sat) — 02:21–03:48 PDT — the rest of the scenarios, and two bugs in Crashtest
+- Ran the 180 P2 and P3 scenarios too. **All 294 scenarios now have a verdict: ✅ 180 · ❌ 104 · ⏭ 10, tracing back to 34 files.** Report: [docs/evidence/findings-conduit-all.md](docs/evidence/findings-conduit-all.md).
+- **Failure 1 — unsafe shell.** Scenario S-286 ("start the backend with the database unreachable") had the agent run `pkill -f "node index.js" -n` on the Mac. It only hit its own process, but a name-matched kill could hit anything. Fix: `shell` and `start_background` refuse `pkill`, `killall`, `kill -1`, `shutdown`/`reboot`/`halt`, `launchctl`, `osascript`; a new `stop_background` tool stops a process the agent started, by name, locally and over SSH.
+- **Failure 2 — lost window.** 72 minutes in, the Crashtest window's renderer died ("Page crashed") and the run went with it. The window now reloads itself on `render-process-gone`; runs live in the main process and projects are re-read from the store. Verified by crashing the renderer on purpose: it came back with the project intact.
+- **Recovery:** the 9 scenarios cut short were re-run on the fixed build. S-286 used `stop_background` this time — no `pkill`.
+- neatlogs: added **Server error in app under test** and **Auth or account bug found** detections; with the existing two they now count 39 / 57 / 108 bugs and 21 unverified verdicts (~7%) across these runs.
+- Second app: kutt (URL shortener) → 50 surfaces, **359 scenarios across 11 journeys** in 144 s on the same build.
+
 ## Building in public
 - 2026-10-09 announcement: https://x.com/kurokotetsuyami/status/2108778646320390337
 

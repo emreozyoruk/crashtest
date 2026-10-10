@@ -14,13 +14,19 @@ Built during [neatHack](https://neatlogs.com/hackathon) (Oct 10–12, 2026). Bui
 
 ## What it found on its first real target
 
-On [TonyMckes/conduit-realworld-example-app](https://github.com/TonyMckes/conduit-realworld-example-app), a well-known RealWorld implementation, Crashtest wrote 245 scenarios, booted the app from scratch (local Postgres, generated `.env`, API + frontend) and found, among others:
+On [TonyMckes/conduit-realworld-example-app](https://github.com/TonyMckes/conduit-realworld-example-app), a well-known RealWorld implementation, Crashtest mapped 39 surfaces into **294 scenarios** across 9 journeys in 143 s, booted the app from scratch (local Postgres, generated `.env`, API + frontend) and ran **every one of them**:
 
-- **A comment can be deleted through any article's URL** — `backend/controllers/comments.js` ignores the slug.
-- **Users can follow themselves** — `backend/controllers/profiles.js` never compares ids.
-- `DEV_DB_LOGGING="false"` crashes the app at boot, because the string `"false"` is truthy.
+**✅ 180 passed · ❌ 104 broken · ⏭ 10 skipped** — and the 104 broken scenarios trace back to **34 files**. Among them:
 
-Details, diffs and screenshots: [docs/evidence/findings-conduit.md](docs/evidence/findings-conduit.md).
+- **Saving your settings with a blank password replaces your password.** `backend/controllers/user.js:36` checks `password !== undefined || password !== ""`, which is always true.
+- **Any bad, forged or expired token crashes the request with a 500** instead of a 401 — 14 scenarios, one error path in `backend/middleware/authentication.js`.
+- **Tokens never expire and survive logout and password changes** (`backend/helper/jwt.js`).
+- **A comment can be deleted through any article's URL** — `backend/controllers/comments.js` ignores the slug. Found on the first run and found again, independently, in the full run.
+- **Duplicate usernames, self-follows, double-click double-publishes**, negative `limit`/`offset` → 500 with raw DB errors.
+
+We checked the top findings against the source by hand. Details, diffs and screenshots: [docs/evidence/findings-conduit.md](docs/evidence/findings-conduit.md).
+
+It is not tied to one app: on [thedevs-network/kutt](https://github.com/thedevs-network/kutt) (URL shortener) the same build mapped 50 surfaces into **359 scenarios across 11 journeys** in 144 s.
 
 ## How it works
 
@@ -43,7 +49,7 @@ GitHub link ─► Intake ─► Inventory agent ─► Scenario writer ─► [
 
 | Tool | How Crashtest uses it |
 |---|---|
-| [neatlogs](https://neatlogs.com) | Every phase is its own traced workflow (`repo-inventory`, `scenario-generation`, `app-bootstrap`, `scenario-sweep`, `app-recovery`, `project-chat`), grouped per project. Two custom detections — **Bug found by Crashtest** and **Unverified verdict** — and before/after traces drove real fixes. Our own build sessions are traced too. [Evidence](docs/evidence/neatlogs-baselines.md) |
+| [neatlogs](https://neatlogs.com) | Every phase is its own traced workflow (`repo-inventory`, `scenario-generation`, `app-bootstrap`, `scenario-sweep`, `app-recovery`, `project-chat`), grouped per project. Four custom detections in a "Crashtest agent" group — **Bug found by Crashtest** (108), **Auth or account bug found** (57), **Server error in app under test** (39) and **Unverified verdict** (21) — and before/after traces drove real fixes. Our own build sessions are traced too. [Evidence](docs/evidence/neatlogs-baselines.md) |
 | [Entire](https://entire.io) | Checkpoints on our commits ([repo on Entire](https://entire.io/gh/emreozyoruk/crashtest), first checkpoint [`97c75579b386`](https://entire.io/gh/emreozyoruk/crashtest/commit/74641efd901999e96d69fd85f69dde70f3aa0a62)), plus **Entire Graph inside the product**: the inventory and sweep agents get graph search / definitions / callers / blast-radius tools over the repo under test. [Evidence](docs/entire/README.md) |
 | [cfo.ai](https://cfo.ai) | [Business plan for Crashtest](https://app.cfo.ai/s/--rWFPOxuMvaL0nN) (read-only link; [Upside](https://app.cfo.ai/s/C9DgOonrAXn3DhqQ), [Downside](https://app.cfo.ai/s/e_GPD5Z-hJGywRX7)): Pro $29 / Cloud $299 pricing, unit costs taken from our neatlogs traces ($0.117 per scenario run, $0.815 per repo inventory), customers → revenue → P&L → cash, and three scenarios. Finding: the first engineer hire decides the runway. [Evidence](docs/cfoai/README.md) |
 

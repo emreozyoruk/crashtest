@@ -1,5 +1,22 @@
 # Crashtest findings — TonyMckes/conduit-realworld-example-app
 
+## Every scenario — 2026-10-10 01:26–03:48 PDT
+
+After the P1 run below, the remaining P2 and P3 scenarios ran too, so all **294 scenarios** of the analysis have a verdict:
+
+| Priority | ✅ Passed | ❌ Broken | ⏭ Skipped |
+|---|---|---|---|
+| P1 | 80 | 33 | 1 |
+| P2 | 68 | 57 | 3 |
+| P3 | 32 | 14 | 6 |
+| **All** | **180** | **104** | **10** |
+
+The 104 broken scenarios trace back to **34 files**; the top four (`controllers/articles.js` 14, `middleware/authentication.js` 14, `controllers/users.js` 10, `helper/jwt.js` 6) hold 44 of them. P2 and P3 findings include UX and polish issues (layout overflow at 480 px, comment timestamps without a time, case-variant duplicate tags) next to real defects (oversized bodies → 500, concurrent duplicate usernames, logout not invalidating sessions in other tabs). Full report: **[findings-conduit-all.md](findings-conduit-all.md)**.
+
+neatlogs detections over the same traces: **Bug found by Crashtest** 108 · **Auth or account bug found** 57 · **Server error in app under test** 39 · **Unverified verdict** 21. The last one is the agent's own admission that it could not check part of a scenario (about 7% of verdicts) — those are the ones to re-run before trusting.
+
+Two problems in Crashtest itself surfaced during this run and were fixed — see the build log: a scenario agent ran `pkill -f "node index.js"` on the Mac (now refused; a `stop_background` tool replaces it), and the Crashtest window's renderer died after 72 minutes (the window now reloads itself; nothing is lost because runs live in the main process). The 9 scenarios cut short by the crash were re-run on the fixed build; S-286, the one that had used `pkill`, used `stop_background` instead.
+
 ## Full P1 run — 2026-10-10 01:26–02:18 PDT
 
 Fresh analysis (latest build, new user data): **294 scenarios across 9 journeys** (114 P1 · 128 P2 · 52 P3) in 143 s. Then every P1 scenario, run locally in one go, app booted from scratch by the bootstrap agent:
