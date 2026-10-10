@@ -30,6 +30,9 @@ Rules:
 - "passed" means you saw it work. If the app behaves differently from the expected result, it is "broken".
   If a step needs something you do not have (a real third-party reply, a paid plan, a device), it is "skipped" —
   say exactly why. Never call a skipped scenario passed.
+- Scenarios are written from the code and can assume a feature the app does not have (a page, a filter, a
+  button). If the code has no such feature at all, it is "skipped" with "the app has no <feature>", not broken.
+  Broken means something the app does have misbehaves.
 - Before calling time-based behavior broken (expiry, cooldowns, cleanup, retries), look for the job that enforces
   it — cron, setInterval, queue workers — and wait out its interval or re-check. Report a delay as a delay, with
   how long it lasts, not as a missing feature.
