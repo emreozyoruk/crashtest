@@ -79,6 +79,7 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 
 ## Building in public
 - 2026-10-09 announcement: https://x.com/kurokotetsuyami/status/2108778646320390337
+- 2026-10-10 full Conduit run (294 scenarios, 104 broken in 34 files): https://x.com/kurokotetsuyami/status/2108943094809071674
 
 ## Demo
 Pending.
@@ -87,9 +88,9 @@ Pending.
 Pending.
 
 ## Submission
-- [ ] Public repo with commits dated during the hackathon
+- [x] Public repo with commits dated during the hackathon
 - [ ] Demo video ≤ 3 min covering neatlogs, Entire and cfo.ai
-- [ ] neatlogs evidence (before/after traces, failure recovery run)
+- [x] neatlogs evidence (before/after traces, failure recovery run)
 - [x] Entire checkpoint link + ID — [`97c75579b386`](https://entire.io/gh/emreozyoruk/crashtest/commit/74641efd901999e96d69fd85f69dde70f3aa0a62)
 - [x] cfo.ai business plan — https://app.cfo.ai/s/--rWFPOxuMvaL0nN
 - [ ] Quote post of the official neatlogs submission post (Mon Oct 12, 06:30–11:25 PDT)
