@@ -1,0 +1,10 @@
+node_modules
+dist
+out
+.DS_Store
+.eslintcache
+*.log*
+.env
+.venv/
+__pycache__/
+.playwright-mcp/
