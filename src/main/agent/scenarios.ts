@@ -104,6 +104,26 @@ function chunks(inv: Inventory): { journey: string; surfaces: Surface[] }[] {
   return out
 }
 
+const isText = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0
+const PRIORITIES: Priority[] = ['P1', 'P2', 'P3']
+
+// The model occasionally drops a required field even with a schema. One bad draft must not
+// sink a whole analysis: drop drafts without a title or expected result, default the rest.
+function clean(d: Partial<Draft>): Draft | null {
+  if (!isText(d.title) || !isText(d.expected)) return null
+  return {
+    title: d.title.trim(),
+    who: isText(d.who) ? d.who : 'Any user',
+    startingState: isText(d.startingState) ? d.startingState : 'Not specified',
+    steps: Array.isArray(d.steps) ? d.steps.filter(isText) : [],
+    expected: d.expected.trim(),
+    priority: PRIORITIES.includes(d.priority as Priority) ? (d.priority as Priority) : 'P2',
+    dimension: isText(d.dimension) ? d.dimension : 'happy path',
+    surfaceIds: Array.isArray(d.surfaceIds) ? d.surfaceIds.filter(isText) : [],
+    runnable: d.runnable !== false
+  }
+}
+
 const normalize = (t: string): string =>
   t
     .toLowerCase()
@@ -129,7 +149,7 @@ export async function generateScenarios(
   let found = 0
 
   const drafts = await mapLimit(parts, CONCURRENCY, async (part) => {
-    const res = await structuredCall<{ scenarios: Draft[] }>({
+    const res = await structuredCall<{ scenarios: Partial<Draft>[] }>({
       model: SCENARIO_MODEL,
       system: SYSTEM,
       prompt:
@@ -139,10 +159,13 @@ export async function generateScenarios(
       schema: SCHEMA,
       maxTokens: 16000
     })
+    const valid = (Array.isArray(res.scenarios) ? res.scenarios : [])
+      .map(clean)
+      .filter((d): d is Draft => d !== null)
     done += 1
-    found += res.scenarios.length
+    found += valid.length
     onProgress({ done, total: parts.length, journey: part.journey, found })
-    return res.scenarios.map((s) => ({ ...s, journey: part.journey }))
+    return valid.map((s) => ({ ...s, journey: part.journey }))
   })
 
   // Merge near-identical titles produced by overlapping chunks, keep journey order, then number.
