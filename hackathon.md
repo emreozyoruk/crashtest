@@ -38,6 +38,12 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
   - S-125: users can follow themselves (`profiles.js` never compares ids).
 - Failure noticed: the Postgres the agent started as a daemon outlived the run. Fix: the bootstrap contract now requires foreground services via `start_background` with data under `.crashtest/`, plus explicit `cleanup` commands that Crashtest always runs at the end.
 
+### 2026-10-10 (Sat) — 00:35–00:51 PDT — neatlogs loop and VDS
+- neatlogs before/after on the inventory agent (3 traces): a prompt instruction did not stop it reaching for a denied Bash tool; offering only the allowed built-in tools did — errored spans 1 → 0, surfaces 38 → 47, scenarios 188 → 245 (cost ~2×). Details: [docs/evidence/neatlogs-baselines.md](docs/evidence/neatlogs-baselines.md).
+- Created two neatlogs detections in a "Crashtest agent" group: **Bug found by Crashtest** and **Unverified verdict**. The second flagged S-125, where the runner faked auth via localStorage and could not check the UI. After making the runner sign in through the app's form, the re-run checked UI and API separately and the detection no longer fires.
+- Fixed by running it: services leaking after quit, projects stuck as busy after a restart.
+- **VDS mode works end to end** on a t3.small EC2 (neatHack AWS credits, SSH only from our IP): Settings → Test connection ✅ → Start → VDS. Crashtest cloned Conduit on the server, booted Postgres + API there, tunnelled the app back to the browser on the Mac and ran S-001 ✅ and S-118 ❌ (same bug reproduced remotely). Nothing left running on the server afterwards.
+
 ## Building in public
 - 2026-10-09 announcement: https://x.com/kurokotetsuyami/status/2108778646320390337
 

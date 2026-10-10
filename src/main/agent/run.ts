@@ -38,7 +38,7 @@ async function openRuntime(project: Project, target: RunTarget): Promise<Runtime
     postMessage(project.id, 'agent', `I can't use the VDS yet: ${problem}\nFix it in **Settings → VDS** (or tell me the details here), then press Start again.`)
     return undefined
   }
-  const appDir = `~/crashtest/${project.name.replace(/[^\w.-]+/g, '-')}`
+  const appDir = `~/crashtest/${project.name.replace(/[^\w.-]+/g, '-').replace(/^-+|-+$/g, '')}`
   const runtime = await createSshRuntime(ssh, appDir, env)
   postMessage(project.id, 'activity', `Connected to ${runtime.label}. Copying the repo to ${appDir}`)
   const token = getSecret('githubToken')
