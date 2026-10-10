@@ -3,6 +3,8 @@
 [neatroots](https://github.com/neatlogs/neatroots) at commit `4ce1faf` (2026-10-10), tested on request from
 neatlogs' head of product engineering ([the ask](https://x.com/kurokotetsuyami/status/2108943094809071674)).
 
+![Summary](neatroots-findings.png)
+
 ## What ran
 
 - Crashtest read the repo, found two products (neatroots and its steering hook), and mapped **neatroots**:
