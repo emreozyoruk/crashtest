@@ -54,6 +54,11 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - The model changed a decision: in Downside, hiring the first engineer at month 6 runs out of cash in Nov 2027; hiring at month 18 keeps $51k. So the hire is gated on MRR, not the calendar. Details: [docs/cfoai/](docs/cfoai/README.md).
 - Cleanup: fixed the two eslint errors (effect setState, non-component export) and formatted `src` with the repo's prettier config — eslint and typecheck are clean.
 
+### 2026-10-10 (Sat) — 01:20–01:27 PDT — failure and recovery: one bad draft sank an analysis
+- A fresh analysis of Conduit (new user data, latest build) wrote 250 scenarios and then failed: `Cannot read properties of undefined (reading 'replace')`.
+- Root cause: the scenario model (Haiku) returned one draft without its `expected` field. The JSON schema asks for it, but the API does not enforce it, and `SCENARIOS.md` generation called `.replace` on it. The crash happened after the traced `scenario-generation` workflow returned, so neatlogs showed that trace (`8e3ab8e1…`) as a success — the failure lived in our own code, outside the span.
+- Fix: every draft is validated. Drafts without a title or an expected result are dropped; the other fields get safe defaults. Re-run on the same repo: **294 scenarios across 9 journeys (114 P1 · 128 P2 · 52 P3) in 143 s**, no error.
+
 ## Building in public
 - 2026-10-09 announcement: https://x.com/kurokotetsuyami/status/2108778646320390337
 
