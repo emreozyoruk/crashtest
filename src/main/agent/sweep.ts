@@ -105,6 +105,10 @@ export async function runScenario(opts: {
     prompt:
       `App: ${opts.inventory?.productName ?? ''} — ${opts.inventory?.summary ?? ''}\n` +
       `Open the app at ${opts.baseUrl}${opts.apiUrl && opts.apiUrl !== opts.baseUrl ? ` (API at ${opts.apiUrl})` : ''}.\n` +
+      (opts.runtime.kind === 'vds'
+        ? `The browser and http_get run on the user's Mac and reach the app only through that URL. The shell runs ` +
+          `on ${opts.runtime.label}, where the app listens on its own ports and that URL does not exist.\n`
+        : '') +
       (opts.bootNotes ? `Boot notes: ${opts.bootNotes}\n` : '') +
       '\n' +
       `Scenario ${s.id} [${s.priority}] — ${s.title}\nWho: ${s.who}\nStarting state: ${s.startingState}\n` +
