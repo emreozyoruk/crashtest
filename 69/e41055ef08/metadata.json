@@ -1,0 +1,53 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "69e41055ef08",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src/main/agent/bootstrap.ts",
+    "src/main/agent/chat.ts",
+    "src/main/agent/graphTools.ts",
+    "src/main/agent/intake.ts",
+    "src/main/agent/inventory.ts",
+    "src/main/agent/llm.ts",
+    "src/main/agent/orchestrator.ts",
+    "src/main/agent/products.ts",
+    "src/main/agent/run.ts",
+    "src/main/agent/runAgent.ts",
+    "src/main/agent/runtimeTools.ts",
+    "src/main/agent/scenarios.ts",
+    "src/main/agent/sweep.ts",
+    "src/main/ipc.ts",
+    "src/main/runtime/local.ts",
+    "src/main/runtime/ssh.ts",
+    "src/main/runtime/types.ts",
+    "src/main/store.ts",
+    "src/preload/index.ts",
+    "src/renderer/src/App.tsx",
+    "src/renderer/src/components/ChatView.tsx",
+    "src/renderer/src/components/Markdown.tsx",
+    "src/renderer/src/components/Marker.tsx",
+    "src/renderer/src/components/ScenarioDetail.tsx",
+    "src/renderer/src/components/ScenariosView.tsx",
+    "src/renderer/src/components/SettingsView.tsx",
+    "src/renderer/src/components/Sidebar.tsx",
+    "src/renderer/src/styles.css"
+  ],
+  "sessions": [
+    {
+      "metadata": "/69/e41055ef08/0/metadata.json",
+      "transcript": "/69/e41055ef08/0/full.jsonl",
+      "compact_transcript": "/69/e41055ef08/0/transcript.jsonl",
+      "content_hash": "/69/e41055ef08/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 4,
+    "cache_creation_tokens": 791,
+    "cache_read_tokens": 647046,
+    "output_tokens": 591,
+    "api_call_count": 2
+  }
+}
