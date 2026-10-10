@@ -1,3 +1,5 @@
+import { writeFileSync } from 'fs'
+import { join } from 'path'
 import { trace } from 'neatlogs'
 import type { Project, RunTarget, Scenario } from '../../shared/types'
 import { getSettings } from '../store'
@@ -9,6 +11,7 @@ import { createSshRuntime, testSsh, type SshTarget } from '../runtime/ssh'
 import { ask, guard, isBusy } from './orchestrator'
 import { bootApp, type BootResult } from './bootstrap'
 import { runScenario } from './sweep'
+import { findingsMarkdown, findingsSummary } from './report'
 
 // Start → choose Local/VDS → boot the app → run each scenario → recover if the app dies → report.
 
@@ -224,12 +227,15 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
     }
 
     const count = (st: Scenario['status']): number => selected.filter((s) => s.status === st).length
+    const broken = selected.filter((s) => s.status === 'broken')
+    writeFileSync(join(project.workdir, 'FINDINGS.md'), findingsMarkdown(project.name, selected))
     postMessage(
       project.id,
       'agent',
       `Run finished: ✅ ${count('passed')} passed · ❌ ${count('broken')} broken · ⏭ ${count('skipped')} skipped · ⬜ ${count('not_run')} not run.` +
-        (count('broken')
-          ? '\nOpen a broken scenario to see the root cause and the suggested fix.'
+        findingsSummary(broken) +
+        (broken.length
+          ? '\n\nOpen a broken scenario to see the root cause and the suggested fix. The full report is in `FINDINGS.md` in the project folder.'
           : '')
     )
   } finally {
