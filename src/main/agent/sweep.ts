@@ -30,6 +30,9 @@ Rules:
 - "passed" means you saw it work. If the app behaves differently from the expected result, it is "broken".
   If a step needs something you do not have (a real third-party reply, a paid plan, a device), it is "skipped" —
   say exactly why. Never call a skipped scenario passed.
+- Before calling time-based behavior broken (expiry, cooldowns, cleanup, retries), look for the job that enforces
+  it — cron, setInterval, queue workers — and wait out its interval or re-check. Report a delay as a delay, with
+  how long it lasts, not as a missing feature.
 - If broken: find the cause in the source code (cite file:line) — the graph tools find handlers, callers and
   blast radius fastest — and write a minimal suggested fix as a unified diff.
   Do not edit any files.
