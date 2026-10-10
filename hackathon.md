@@ -31,6 +31,13 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - Ran the built app (driven by Playwright's Electron runner) on `TonyMckes/conduit-realworld-example-app`: clone → product grouping (frontend + backend correctly treated as one product, no question asked) → inventory (38 surfaces, 5 journeys) → **188 scenarios** (78 P1 · 79 P2 · 31 P3, 5 not runnable locally) in 103 s total.
 - neatlogs showed the inventory agent trying `Bash(cat package.json)` and getting denied (1 errored span, $0.46). Fix: the prompt now states the agent only has read tools, and the agent gets Entire Graph tools. Baseline kept in [docs/evidence/neatlogs-baselines.md](docs/evidence/neatlogs-baselines.md) for the before/after comparison.
 
+### 2026-10-10 (Sat) — 00:30 PDT — first real run
+- Selected 5 of the 188 scenarios, pressed Start, chose **Local**. The bootstrap agent booted Conduit from scratch (local Postgres, generated `.env`, API + Vite with strict ports) and noticed `DEV_DB_LOGGING="false"` crashes Sequelize.
+- Result: **3 passed, 2 broken** in 151 s. Both bugs are real, with file:line root causes and diffs — see [docs/evidence/findings-conduit.md](docs/evidence/findings-conduit.md):
+  - S-118: a comment can be deleted through any article's URL (`comments.js` ignores the slug).
+  - S-125: users can follow themselves (`profiles.js` never compares ids).
+- Failure noticed: the Postgres the agent started as a daemon outlived the run. Fix: the bootstrap contract now requires foreground services via `start_background` with data under `.crashtest/`, plus explicit `cleanup` commands that Crashtest always runs at the end.
+
 ## Building in public
 - 2026-10-09 announcement: https://x.com/kurokotetsuyami/status/2108778646320390337
 

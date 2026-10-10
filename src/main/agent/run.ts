@@ -93,6 +93,7 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
   const target = await chooseTarget(project)
   const runtime = await openRuntime(project, target)
   if (!runtime) return
+  let cleanup: string[] = []
   try {
     project.phase = 'bootstrapping'
     publishProject(project)
@@ -107,6 +108,7 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
         signal
       })
     )
+    cleanup = boot.cleanup ?? []
     if (!boot.ok) {
       const need = boot.missingEnv.length ? `\n\nI need: ${boot.missingEnv.map((v) => `\`${v}\``).join(', ')} — send them here and press Start again.` : ''
       postMessage(project.id, 'agent', `I couldn't get the app running: ${boot.reason}${need}`)
@@ -153,6 +155,7 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
         (count('broken') ? '\nOpen a broken scenario to see the root cause and the suggested fix.' : '')
     )
   } finally {
+    for (const cmd of cleanup) await runtime.run(cmd, 30_000).catch(() => undefined)
     await runtime.dispose()
     project.phase = 'done'
     publishProject(project)

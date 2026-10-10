@@ -10,6 +10,7 @@ export interface BootResult {
   missingEnv: string[]
   reason: string
   notes: string
+  cleanup: string[]
 }
 
 const SYSTEM = `You are Crashtest's bootstrap agent. Get the application in the project folder running so its
@@ -28,6 +29,10 @@ How to work:
    works or you hit a real blocker.
 6. Only report missingEnv for values you truly cannot invent (third-party API keys, OAuth client secrets).
 7. Do not modify application source code. Config files and .env are fine.
+8. Everything you start must be stoppable by Crashtest. Run databases and services in the FOREGROUND through
+   start_background (e.g. "postgres -D .crashtest/pg -p 5544", "redis-server --port 6390"), never as daemons
+   (no pg_ctl start, brew services, docker run -d). Keep data directories inside .crashtest/ in the project folder.
+   If you could not avoid starting something detached, put the exact commands that stop it in cleanup.
 
 Return baseUrl = the URL the browser should open (from expose_port) and apiUrl = the API base URL if separate.`
 
@@ -39,9 +44,10 @@ const SCHEMA = {
     apiUrl: { type: 'string' },
     missingEnv: { type: 'array', items: { type: 'string' } },
     reason: { type: 'string', description: 'If not ok: what blocked you, in one or two sentences' },
-    notes: { type: 'string', description: 'What you did to get it running (ports, DB choice, env written)' }
+    notes: { type: 'string', description: 'What you did to get it running (ports, DB choice, env written)' },
+    cleanup: { type: 'array', items: { type: 'string' }, description: 'Shell commands that stop anything started detached' }
   },
-  required: ['ok', 'baseUrl', 'apiUrl', 'missingEnv', 'reason', 'notes']
+  required: ['ok', 'baseUrl', 'apiUrl', 'missingEnv', 'reason', 'notes', 'cleanup']
 }
 
 export async function bootApp(opts: {
