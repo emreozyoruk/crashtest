@@ -64,7 +64,12 @@ pre {
   display: inline-block;
   flex: none;
   border-radius: 50%;
-  background: conic-gradient(var(--ink) 0 25%, var(--marker) 0 50%, var(--ink) 0 75%, var(--marker) 0);
+  background: conic-gradient(
+    var(--ink) 0 25%,
+    var(--marker) 0 50%,
+    var(--ink) 0 75%,
+    var(--marker) 0
+  );
   box-shadow: 0 0 0 1.5px var(--ink);
 }
 

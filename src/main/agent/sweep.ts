@@ -62,7 +62,15 @@ function playwrightServer(outputDir: string): Record<string, unknown> {
     playwright: {
       type: 'stdio',
       command: 'node',
-      args: [cli, '--headless', '--isolated', '--viewport-size', '1280,800', '--output-dir', outputDir]
+      args: [
+        cli,
+        '--headless',
+        '--isolated',
+        '--viewport-size',
+        '1280,800',
+        '--output-dir',
+        outputDir
+      ]
     }
   }
 }
@@ -90,8 +98,19 @@ export async function runScenario(opts: {
       `Scenario ${s.id} [${s.priority}] — ${s.title}\nWho: ${s.who}\nStarting state: ${s.startingState}\n` +
       `Steps:\n${s.steps.map((x, i) => `${i + 1}. ${x}`).join('\n')}\nExpected: ${s.expected}\n\n` +
       `Save screenshots into ${outputDir}. Run it now and report the verdict.`,
-    allowedTools: ['Read', 'Grep', 'Glob', 'mcp__playwright', ...APP_TOOLS, ...(Object.keys(graph).length ? GRAPH_TOOLS : [])],
-    mcpServers: { ...playwrightServer(outputDir), ...(await appToolsServer(opts.runtime)), ...graph },
+    allowedTools: [
+      'Read',
+      'Grep',
+      'Glob',
+      'mcp__playwright',
+      ...APP_TOOLS,
+      ...(Object.keys(graph).length ? GRAPH_TOOLS : [])
+    ],
+    mcpServers: {
+      ...playwrightServer(outputDir),
+      ...(await appToolsServer(opts.runtime)),
+      ...graph
+    },
     schema: SCHEMA,
     maxTurns: 40,
     signal: opts.signal

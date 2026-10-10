@@ -30,7 +30,11 @@ export function cancel(projectId: string): void {
 }
 
 // Posts a message with buttons and waits until the user clicks one.
-export function ask(projectId: string, text: string, actions: { id: string; label: string }[]): Promise<string> {
+export function ask(
+  projectId: string,
+  text: string,
+  actions: { id: string; label: string }[]
+): Promise<string> {
   const message = postMessage(projectId, 'agent', text, { actions })
   return new Promise((resolve) => pending.set(projectId, { messageId: message.id, resolve }))
 }
@@ -55,7 +59,10 @@ function update(project: Project, patch: Partial<Project>): Project {
   return project
 }
 
-export async function guard(project: Project, fn: (signal: AbortSignal) => Promise<void>): Promise<void> {
+export async function guard(
+  project: Project,
+  fn: (signal: AbortSignal) => Promise<void>
+): Promise<void> {
   const controller = new AbortController()
   running.set(project.id, controller)
   try {
@@ -64,7 +71,10 @@ export async function guard(project: Project, fn: (signal: AbortSignal) => Promi
     if (controller.signal.aborted) {
       postMessage(project.id, 'agent', 'Stopped.')
     } else {
-      const text = err instanceof MissingKeyError ? err.message : `Something went wrong: ${(err as Error).message}`
+      const text =
+        err instanceof MissingKeyError
+          ? err.message
+          : `Something went wrong: ${(err as Error).message}`
       postMessage(project.id, 'agent', text)
     }
     update(project, { phase: project.inventory ? 'ready' : 'failed' })
@@ -95,9 +105,14 @@ export function createProject(repoUrlText: string): Project | undefined {
 async function pickProduct(project: Project): Promise<string[] | undefined> {
   const dirs = detectProducts(project.workdir)
   if (dirs.length < 2) return undefined
-  postMessage(project.id, 'activity', `Found ${dirs.length} packages — working out which are separate products`)
-  const products: Product[] = await trace({ name: 'product-detection', kind: 'CHAIN', sessionId: project.id }, () =>
-    groupProducts(project.workdir, dirs)
+  postMessage(
+    project.id,
+    'activity',
+    `Found ${dirs.length} packages — working out which are separate products`
+  )
+  const products: Product[] = await trace(
+    { name: 'product-detection', kind: 'CHAIN', sessionId: project.id },
+    () => groupProducts(project.workdir, dirs)
   )
   if (products.length < 2) return undefined
   update(project, { phase: 'choosing_product' })
@@ -106,7 +121,11 @@ async function pickProduct(project: Project): Promise<string[] | undefined> {
     { id: 'all', label: 'All of them' }
   ]
   const list = products.map((p) => `• **${p.name}** — ${p.description}`).join('\n')
-  const choice = await ask(project.id, `This repo holds ${products.length} products:\n${list}\n\nWhich one should I map?`, actions)
+  const choice = await ask(
+    project.id,
+    `This repo holds ${products.length} products:\n${list}\n\nWhich one should I map?`,
+    actions
+  )
   if (choice === 'all') return products.flatMap((p) => p.paths)
   const chosen = products[Number(choice)]
   update(project, { productPath: chosen.name })
@@ -119,30 +138,48 @@ async function analyze(project: Project, signal: AbortSignal): Promise<void> {
   const productPaths = await pickProduct(project)
 
   update(project, { phase: 'inventory' })
-  postMessage(project.id, 'agent', 'Reading the code to map everything this app can do. This takes a few minutes.')
+  postMessage(
+    project.id,
+    'agent',
+    'Reading the code to map everything this app can do. This takes a few minutes.'
+  )
   const inv = await trace({ name: 'repo-inventory', kind: 'WORKFLOW', sessionId: project.id }, () =>
     buildInventory({ projectId: project.id, workdir: project.workdir, productPaths, signal })
   )
   const inventory = inv.output
   update(project, { inventory, name: inventory.productName || project.name })
-  const counts = inventory.surfaces.reduce<Record<string, number>>((acc, s) => ({ ...acc, [s.kind]: (acc[s.kind] ?? 0) + 1 }), {})
+  const counts = inventory.surfaces.reduce<Record<string, number>>(
+    (acc, s) => ({ ...acc, [s.kind]: (acc[s.kind] ?? 0) + 1 }),
+    {}
+  )
   postMessage(
     project.id,
     'agent',
     `**${inventory.productName}** — ${inventory.summary}\n\n` +
-      `Mapped ${inventory.surfaces.length} surfaces: ${Object.entries(counts).map(([k, v]) => `${v} ${k}`).join(', ')}.\n` +
+      `Mapped ${inventory.surfaces.length} surfaces: ${Object.entries(counts)
+        .map(([k, v]) => `${v} ${k}`)
+        .join(', ')}.\n` +
       `Journeys: ${inventory.journeys.join(' → ')}`
   )
 
   update(project, { phase: 'scenarios' })
   postMessage(project.id, 'agent', 'Now writing every scenario a user could walk through…')
-  const scenarios = await trace({ name: 'scenario-generation', kind: 'WORKFLOW', sessionId: project.id }, () =>
-    generateScenarios(inventory, (p) =>
-      postMessage(project.id, 'activity', `Scenarios ${p.done}/${p.total} · ${p.journey} · ${p.found} so far`)
-    )
+  const scenarios = await trace(
+    { name: 'scenario-generation', kind: 'WORKFLOW', sessionId: project.id },
+    () =>
+      generateScenarios(inventory, (p) =>
+        postMessage(
+          project.id,
+          'activity',
+          `Scenarios ${p.done}/${p.total} · ${p.journey} · ${p.found} so far`
+        )
+      )
   )
   update(project, { scenarios, phase: 'ready' })
-  writeFileSync(join(project.workdir, 'SCENARIOS.md'), scenariosMarkdown(project.name, inventory, scenarios))
+  writeFileSync(
+    join(project.workdir, 'SCENARIOS.md'),
+    scenariosMarkdown(project.name, inventory, scenarios)
+  )
 
   const by = (p: string): number => scenarios.filter((s) => s.priority === p).length
   postMessage(

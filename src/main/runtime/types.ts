@@ -25,4 +25,5 @@ export interface Runtime {
   dispose(): Promise<void>
 }
 
-export const tail = (text: string, max = 8000): string => (text.length > max ? `…${text.slice(-max)}` : text)
+export const tail = (text: string, max = 8000): string =>
+  text.length > max ? `…${text.slice(-max)}` : text

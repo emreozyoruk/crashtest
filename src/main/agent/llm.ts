@@ -30,7 +30,13 @@ export async function structuredCall<T>(opts: {
     max_tokens: opts.maxTokens ?? 8000,
     system: opts.system,
     messages: [{ role: 'user', content: opts.prompt }],
-    tools: [{ name: opts.toolName, description: 'Return the result.', input_schema: opts.schema as Anthropic.Tool.InputSchema }],
+    tools: [
+      {
+        name: opts.toolName,
+        description: 'Return the result.',
+        input_schema: opts.schema as Anthropic.Tool.InputSchema
+      }
+    ],
     tool_choice: { type: 'tool', name: opts.toolName }
   })
   const block = res.content.find((b) => b.type === 'tool_use')

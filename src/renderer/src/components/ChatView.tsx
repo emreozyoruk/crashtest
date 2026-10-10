@@ -4,7 +4,8 @@ import { isWorking } from '../working'
 import Markdown from './Markdown'
 import Marker from './Marker'
 
-type Block = { kind: 'message'; message: ChatMessage } | { kind: 'activity'; id: string; lines: string[] }
+type Block =
+  { kind: 'message'; message: ChatMessage } | { kind: 'activity'; id: string; lines: string[] }
 
 // Consecutive tool-activity lines collapse into one quiet block between real messages.
 function toBlocks(messages: ChatMessage[]): Block[] {
@@ -44,7 +45,10 @@ function Empty(): React.JSX.Element {
     <div className="empty">
       <Marker size={44} />
       <h2>Find the bugs your users would hit, before they hit them.</h2>
-      <p>Paste a GitHub link. Crashtest reads the code, writes every scenario a user can walk through, then runs them in a real browser.</p>
+      <p>
+        Paste a GitHub link. Crashtest reads the code, writes every scenario a user can walk
+        through, then runs them in a real browser.
+      </p>
       <ol className="steps">
         <li>Maps every screen, action, API and rule from the code</li>
         <li>Writes the scenarios, ranked P1 to P3</li>
@@ -54,7 +58,13 @@ function Empty(): React.JSX.Element {
   )
 }
 
-export default function ChatView({ project, onCreated }: { project?: Project; onCreated: (id: string) => void }): React.JSX.Element {
+export default function ChatView({
+  project,
+  onCreated
+}: {
+  project?: Project
+  onCreated: (id: string) => void
+}): React.JSX.Element {
   const [text, setText] = useState('')
   const [error, setError] = useState('')
   const [sending, setSending] = useState(false)
@@ -85,7 +95,11 @@ export default function ChatView({ project, onCreated }: { project?: Project; on
           <div className="messages-inner">
             {blocks.map((block, i) =>
               block.kind === 'activity' ? (
-                <ActivityBlock key={block.id} lines={block.lines} live={working && i === blocks.length - 1} />
+                <ActivityBlock
+                  key={block.id}
+                  lines={block.lines}
+                  live={working && i === blocks.length - 1}
+                />
               ) : (
                 <div key={block.message.id} className={`msg ${block.message.role}`}>
                   <Markdown text={block.message.text} />
@@ -96,7 +110,9 @@ export default function ChatView({ project, onCreated }: { project?: Project; on
                           key={a.id}
                           className={`btn ${block.message.chosenActionId === a.id ? 'chosen' : ''}`}
                           disabled={Boolean(block.message.chosenActionId)}
-                          onClick={() => void window.api.chooseAction(project.id, block.message.id, a.id)}
+                          onClick={() =>
+                            void window.api.chooseAction(project.id, block.message.id, a.id)
+                          }
                         >
                           {a.label}
                         </button>
@@ -110,7 +126,11 @@ export default function ChatView({ project, onCreated }: { project?: Project; on
               <div className="working">
                 <Marker size={14} spin />
                 Working
-                <button className="btn ghost" style={{ marginLeft: 8, padding: '2px 10px' }} onClick={() => void window.api.stopRun(project.id)}>
+                <button
+                  className="btn ghost"
+                  style={{ marginLeft: 8, padding: '2px 10px' }}
+                  onClick={() => void window.api.stopRun(project.id)}
+                >
                   Stop
                 </button>
               </div>
@@ -125,7 +145,11 @@ export default function ChatView({ project, onCreated }: { project?: Project; on
         <div className="composer-inner">
           <textarea
             value={text}
-            placeholder={project ? 'Ask about this app, share .env values or server details…' : 'https://github.com/owner/repo'}
+            placeholder={
+              project
+                ? 'Ask about this app, share .env values or server details…'
+                : 'https://github.com/owner/repo'
+            }
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
@@ -136,7 +160,11 @@ export default function ChatView({ project, onCreated }: { project?: Project; on
             rows={1}
             aria-label="Message"
           />
-          <button className="btn primary" onClick={() => void send()} disabled={!text.trim() || sending}>
+          <button
+            className="btn primary"
+            onClick={() => void send()}
+            disabled={!text.trim() || sending}
+          >
             {project ? 'Send' : 'Map this repo'}
           </button>
         </div>

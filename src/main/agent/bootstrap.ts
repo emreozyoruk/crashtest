@@ -44,8 +44,15 @@ const SCHEMA = {
     apiUrl: { type: 'string' },
     missingEnv: { type: 'array', items: { type: 'string' } },
     reason: { type: 'string', description: 'If not ok: what blocked you, in one or two sentences' },
-    notes: { type: 'string', description: 'What you did to get it running (ports, DB choice, env written)' },
-    cleanup: { type: 'array', items: { type: 'string' }, description: 'Shell commands that stop anything started detached' }
+    notes: {
+      type: 'string',
+      description: 'What you did to get it running (ports, DB choice, env written)'
+    },
+    cleanup: {
+      type: 'array',
+      items: { type: 'string' },
+      description: 'Shell commands that stop anything started detached'
+    }
   },
   required: ['ok', 'baseUrl', 'apiUrl', 'missingEnv', 'reason', 'notes', 'cleanup']
 }

@@ -27,14 +27,18 @@ export function registerIpc(): void {
   ipcMain.handle('chat:send', async (_e, projectId: string | null, text: string) => {
     if (!projectId) {
       const project = createProject(text.trim())
-      return project ? { projectId: project.id } : { error: 'Paste a GitHub repository link to get started.' }
+      return project
+        ? { projectId: project.id }
+        : { error: 'Paste a GitHub repository link to get started.' }
     }
     const project = getProject(projectId)
     if (!project) return { error: 'Project not found' }
     postMessage(project.id, 'user', text)
     if (isBusy(project.id)) {
       // The agent is mid-task; still answer, but keep it to the chat assistant.
-      void chat(project, text, startRun).catch((err) => postMessage(project.id, 'agent', (err as Error).message))
+      void chat(project, text, startRun).catch((err) =>
+        postMessage(project.id, 'agent', (err as Error).message)
+      )
       return { projectId }
     }
     void guard(project, () => chat(project, text, startRun))
@@ -65,7 +69,11 @@ export function registerIpc(): void {
   ipcMain.handle('settings:save', (_e, next: Settings) => saveSettings(next))
   ipcMain.handle('vds:test', async () => {
     const { ssh } = getSettings()
-    return testSsh({ ...ssh, password: getSecret('sshPassword'), privateKey: getSecret('sshPrivateKey') })
+    return testSsh({
+      ...ssh,
+      password: getSecret('sshPassword'),
+      privateKey: getSecret('sshPrivateKey')
+    })
   })
   ipcMain.handle('secrets:set', (_e, name: SecretName, value: string) => {
     setSecret(name, value)

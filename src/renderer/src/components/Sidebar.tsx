@@ -30,7 +30,10 @@ export default function Sidebar(props: {
         <Marker size={22} />
         Crashtest
       </div>
-      <button className={`nav-button new-project ${props.selectedId === null && props.view !== 'settings' ? 'active' : ''}`} onClick={props.onNew}>
+      <button
+        className={`nav-button new-project ${props.selectedId === null && props.view !== 'settings' ? 'active' : ''}`}
+        onClick={props.onNew}
+      >
         + New project
       </button>
       {props.projects.map((p) => {
@@ -46,7 +49,13 @@ export default function Sidebar(props: {
             }}
             title="Right-click to remove"
           >
-            {isWorking(p) ? <Marker size={12} spin /> : <span className={`status ${broken ? 'broken' : p.phase === 'done' ? 'passed' : 'not_run'}`} />}
+            {isWorking(p) ? (
+              <Marker size={12} spin />
+            ) : (
+              <span
+                className={`status ${broken ? 'broken' : p.phase === 'done' ? 'passed' : 'not_run'}`}
+              />
+            )}
             <span className="name">
               {p.name}
               <span className="sub" style={{ display: 'block' }}>
@@ -58,7 +67,10 @@ export default function Sidebar(props: {
         )
       })}
       <div className="sidebar-spacer" />
-      <button className={`nav-button ${props.view === 'settings' ? 'active' : ''}`} onClick={props.onSettings}>
+      <button
+        className={`nav-button ${props.view === 'settings' ? 'active' : ''}`}
+        onClick={props.onSettings}
+      >
         Settings
       </button>
     </nav>

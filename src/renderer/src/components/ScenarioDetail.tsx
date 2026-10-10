@@ -6,7 +6,16 @@ function Diff({ text }: { text: string }): React.JSX.Element {
   return (
     <pre className="diff">
       {text.split('\n').map((line, i) => (
-        <div key={i} className={line.startsWith('+') && !line.startsWith('+++') ? 'add' : line.startsWith('-') && !line.startsWith('---') ? 'del' : ''}>
+        <div
+          key={i}
+          className={
+            line.startsWith('+') && !line.startsWith('+++')
+              ? 'add'
+              : line.startsWith('-') && !line.startsWith('---')
+                ? 'del'
+                : ''
+          }
+        >
           {line || ' '}
         </div>
       ))}
@@ -14,14 +23,25 @@ function Diff({ text }: { text: string }): React.JSX.Element {
   )
 }
 
-export default function ScenarioDetail({ project, scenario: s, onClose }: { project: Project; scenario: Scenario; onClose: () => void }): React.JSX.Element {
+export default function ScenarioDetail({
+  project,
+  scenario: s,
+  onClose
+}: {
+  project: Project
+  scenario: Scenario
+  onClose: () => void
+}): React.JSX.Element {
   // Keyed by screenshot path so a stale image never shows while the next one loads.
   const shotPath = s.finding?.screenshot
   const [loaded, setLoaded] = useState<{ path: string; data: string | null } | null>(null)
   const shot = loaded && loaded.path === shotPath ? loaded.data : null
 
   useEffect(() => {
-    if (shotPath) void window.api.imageData(project.id, shotPath).then((data) => setLoaded({ path: shotPath, data }))
+    if (shotPath)
+      void window.api
+        .imageData(project.id, shotPath)
+        .then((data) => setLoaded({ path: shotPath, data }))
   }, [project.id, shotPath])
 
   return (

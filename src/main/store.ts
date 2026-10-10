@@ -38,7 +38,14 @@ export function loadStore(): void {
   settings = { ...DEFAULT_SETTINGS, ...readJson<Partial<Settings>>('settings.json', {}) }
   // A quit or crash mid-task leaves projects and scenarios marked as busy; nothing is running
   // after a restart, so put them back where the user can start again.
-  const busy = new Set(['cloning', 'choosing_product', 'inventory', 'scenarios', 'bootstrapping', 'sweeping'])
+  const busy = new Set([
+    'cloning',
+    'choosing_product',
+    'inventory',
+    'scenarios',
+    'bootstrapping',
+    'sweeping'
+  ])
   for (const p of projects) {
     if (busy.has(p.phase)) p.phase = p.scenarios.length ? 'ready' : 'failed'
     for (const s of p.scenarios) if (s.status === 'running') s.status = 'not_run'
@@ -67,7 +74,11 @@ export function saveSettings(next: Settings): void {
   writeJson('settings.json', settings)
 }
 
-export function newMessage(role: ChatMessage['role'], text: string, extra: Partial<ChatMessage> = {}): ChatMessage {
+export function newMessage(
+  role: ChatMessage['role'],
+  text: string,
+  extra: Partial<ChatMessage> = {}
+): ChatMessage {
   return { id: randomUUID(), role, text, createdAt: Date.now(), ...extra }
 }
 

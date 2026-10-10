@@ -18,7 +18,9 @@ function App(): React.JSX.Element {
       setProjects((prev) => {
         if (event.type === 'project') {
           const exists = prev.some((p) => p.id === event.project.id)
-          return exists ? prev.map((p) => (p.id === event.project.id ? event.project : p)) : [event.project, ...prev]
+          return exists
+            ? prev.map((p) => (p.id === event.project.id ? event.project : p))
+            : [event.project, ...prev]
         }
         return prev.map((p) =>
           p.id === event.projectId && !p.messages.some((m) => m.id === event.message.id)
@@ -65,7 +67,10 @@ function App(): React.JSX.Element {
                   <span className="repo">{project.repoUrl}</span>
                 </h1>
                 <div className="tabs" role="tablist">
-                  <button className={`tab ${view === 'chat' ? 'active' : ''}`} onClick={() => setView('chat')}>
+                  <button
+                    className={`tab ${view === 'chat' ? 'active' : ''}`}
+                    onClick={() => setView('chat')}
+                  >
                     Chat
                   </button>
                   <button

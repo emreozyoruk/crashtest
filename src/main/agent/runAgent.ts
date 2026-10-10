@@ -78,7 +78,9 @@ function describeTool(name: string, input: Record<string, unknown>, cwd: string)
     case 'mcp__graph__impact':
       return `Graph ${name.replace('mcp__graph__', '')}: ${input.symbol}`
     default:
-      return name.startsWith('mcp__playwright__') ? `Browser: ${name.replace('mcp__playwright__browser_', '').replace(/_/g, ' ')}` : name
+      return name.startsWith('mcp__playwright__')
+        ? `Browser: ${name.replace('mcp__playwright__browser_', '').replace(/_/g, ' ')}`
+        : name
   }
 }
 
@@ -112,7 +114,11 @@ export async function runAgent<T = string>(opts: AgentRunOptions): Promise<Agent
     if (message.type === 'assistant') {
       for (const block of message.message.content) {
         if (block.type === 'tool_use' && !HIDDEN_TOOLS.has(block.name)) {
-          postMessage(opts.projectId, 'activity', describeTool(block.name, block.input as Record<string, unknown>, opts.cwd))
+          postMessage(
+            opts.projectId,
+            'activity',
+            describeTool(block.name, block.input as Record<string, unknown>, opts.cwd)
+          )
         }
       }
     }

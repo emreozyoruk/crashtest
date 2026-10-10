@@ -9,12 +9,17 @@ const api = {
     ipcRenderer.invoke('chat:send', projectId, text),
   chooseAction: (projectId: string, messageId: string, actionId: string): Promise<boolean> =>
     ipcRenderer.invoke('chat:action', projectId, messageId, actionId),
-  startRun: (projectId: string, scenarioIds: string[]): Promise<void> => ipcRenderer.invoke('run:start', projectId, scenarioIds),
-  imageData: (projectId: string, path: string): Promise<string | null> => ipcRenderer.invoke('files:image', projectId, path),
+  startRun: (projectId: string, scenarioIds: string[]): Promise<void> =>
+    ipcRenderer.invoke('run:start', projectId, scenarioIds),
+  imageData: (projectId: string, path: string): Promise<string | null> =>
+    ipcRenderer.invoke('files:image', projectId, path),
   stopRun: (projectId: string): Promise<void> => ipcRenderer.invoke('run:stop', projectId),
-  getSettings: (): Promise<{ settings: Settings; secrets: SecretStatus }> => ipcRenderer.invoke('settings:get'),
-  saveSettings: (settings: Settings): Promise<void> => ipcRenderer.invoke('settings:save', settings),
-  setSecret: (name: SecretName, value: string): Promise<SecretStatus> => ipcRenderer.invoke('secrets:set', name, value),
+  getSettings: (): Promise<{ settings: Settings; secrets: SecretStatus }> =>
+    ipcRenderer.invoke('settings:get'),
+  saveSettings: (settings: Settings): Promise<void> =>
+    ipcRenderer.invoke('settings:save', settings),
+  setSecret: (name: SecretName, value: string): Promise<SecretStatus> =>
+    ipcRenderer.invoke('secrets:set', name, value),
   testVds: (): Promise<string | null> => ipcRenderer.invoke('vds:test'),
   onEvent: (fn: (event: AppEvent) => void): (() => void) => {
     const listener = (_: unknown, event: AppEvent): void => fn(event)

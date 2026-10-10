@@ -15,7 +15,8 @@ export type StartRunFn = (project: Project, scenarioIds: string[]) => void
 const TOOLS: Anthropic.Tool[] = [
   {
     name: 'save_env_var',
-    description: 'Store an environment variable the app under test needs (from the user). Values are encrypted.',
+    description:
+      'Store an environment variable the app under test needs (from the user). Values are encrypted.',
     input_schema: {
       type: 'object',
       properties: { key: { type: 'string' }, value: { type: 'string' } },
@@ -24,7 +25,7 @@ const TOOLS: Anthropic.Tool[] = [
   },
   {
     name: 'save_vds',
-    description: 'Store SSH details of the user\'s server (VDS) for running scenarios remotely.',
+    description: "Store SSH details of the user's server (VDS) for running scenarios remotely.",
     input_schema: {
       type: 'object',
       properties: {
@@ -38,7 +39,8 @@ const TOOLS: Anthropic.Tool[] = [
   },
   {
     name: 'start_run',
-    description: 'Start running scenarios. Use "P1", "P2", "P3", "all", or explicit ids like ["S-004","S-010"].',
+    description:
+      'Start running scenarios. Use "P1", "P2", "P3", "all", or explicit ids like ["S-004","S-010"].',
     input_schema: {
       type: 'object',
       properties: { selection: { type: 'array', items: { type: 'string' } } },
@@ -50,19 +52,28 @@ const TOOLS: Anthropic.Tool[] = [
 function context(project: Project): string {
   const inv = project.inventory
   const lines = [`Project: ${project.name} (${project.repoUrl}), phase: ${project.phase}`]
-  if (inv) lines.push(`Summary: ${inv.summary}`, `Journeys: ${inv.journeys.join(' → ')}`, `Run hints: ${inv.runHints.howToRun}`)
+  if (inv)
+    lines.push(
+      `Summary: ${inv.summary}`,
+      `Journeys: ${inv.journeys.join(' → ')}`,
+      `Run hints: ${inv.runHints.howToRun}`
+    )
   const env = Object.keys(getProjectEnv(project.id))
   lines.push(`Stored env vars: ${env.length ? env.join(', ') : 'none'}`)
   lines.push(`VDS configured: ${getSettings().ssh.host ? 'yes' : 'no'}`)
   for (const s of project.scenarios.slice(0, 400)) {
-    lines.push(`${s.id} [${s.priority}] [${s.status}] ${s.journey} — ${s.title}${s.finding ? ` — FINDING: ${s.finding.summary}` : ''}`)
+    lines.push(
+      `${s.id} [${s.priority}] [${s.status}] ${s.journey} — ${s.title}${s.finding ? ` — FINDING: ${s.finding.summary}` : ''}`
+    )
   }
   return lines.join('\n')
 }
 
 function select(project: Project, selection: string[]): string[] {
   return project.scenarios
-    .filter((s) => selection.includes('all') || selection.includes(s.priority) || selection.includes(s.id))
+    .filter(
+      (s) => selection.includes('all') || selection.includes(s.priority) || selection.includes(s.id)
+    )
     .map((s) => s.id)
 }
 
@@ -71,10 +82,16 @@ export async function chat(project: Project, text: string, startRun: StartRunFn)
   const history: Anthropic.MessageParam[] = project.messages
     .filter((m) => m.role !== 'activity')
     .slice(-20)
-    .map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text || '(buttons)' }))
+    .map((m) => ({
+      role: m.role === 'user' ? 'user' : 'assistant',
+      content: m.text || '(buttons)'
+    }))
   // The latest user message is already in history (posted by the caller).
-  const messages: Anthropic.MessageParam[] = history.length ? history : [{ role: 'user', content: text }]
-  if (messages[0].role !== 'user') messages.unshift({ role: 'user', content: '(conversation start)' })
+  const messages: Anthropic.MessageParam[] = history.length
+    ? history
+    : [{ role: 'user', content: text }]
+  if (messages[0].role !== 'user')
+    messages.unshift({ role: 'user', content: '(conversation start)' })
 
   const system =
     'You are Crashtest, an agent that maps every user scenario of an app and runs them for real. ' +
@@ -84,8 +101,18 @@ export async function chat(project: Project, text: string, startRun: StartRunFn)
 
   await trace({ name: 'project-chat', kind: 'AGENT', sessionId: project.id }, async () => {
     for (let turn = 0; turn < 5; turn++) {
-      const res = await client.messages.create({ model: AGENT_MODEL, max_tokens: 1500, system, messages, tools: TOOLS })
-      const reply = res.content.filter((b) => b.type === 'text').map((b) => b.text).join('\n').trim()
+      const res = await client.messages.create({
+        model: AGENT_MODEL,
+        max_tokens: 1500,
+        system,
+        messages,
+        tools: TOOLS
+      })
+      const reply = res.content
+        .filter((b) => b.type === 'text')
+        .map((b) => b.text)
+        .join('\n')
+        .trim()
       if (reply) postMessage(project.id, 'agent', reply)
       const calls = res.content.filter((b): b is Anthropic.ToolUseBlock => b.type === 'tool_use')
       if (!calls.length) return
@@ -99,14 +126,25 @@ export async function chat(project: Project, text: string, startRun: StartRunFn)
         }
         if (call.name === 'save_vds') {
           const s = getSettings()
-          saveSettings({ ...s, ssh: { host: String(input.host), port: Number(input.port ?? 22), username: String(input.username) } })
+          saveSettings({
+            ...s,
+            ssh: {
+              host: String(input.host),
+              port: Number(input.port ?? 22),
+              username: String(input.username)
+            }
+          })
           if (input.password) setSecret('sshPassword', String(input.password))
           postMessage(project.id, 'activity', `Saved VDS ${input.username}@${input.host}`)
           return { type: 'tool_result', tool_use_id: call.id, content: 'saved' }
         }
         const ids = select(project, (input.selection as string[]) ?? [])
         if (ids.length) startRun(project, ids)
-        return { type: 'tool_result', tool_use_id: call.id, content: ids.length ? `started ${ids.length} scenarios` : 'no matching scenarios' }
+        return {
+          type: 'tool_result',
+          tool_use_id: call.id,
+          content: ids.length ? `started ${ids.length} scenarios` : 'no matching scenarios'
+        }
       })
       messages.push({ role: 'user', content: results })
     }

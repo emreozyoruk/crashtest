@@ -49,8 +49,30 @@ export async function cloneRepo(ref: RepoRef): Promise<string> {
 
 // --- Monorepo detection: workspace config first, then compose services, then manifests. ---
 
-const MANIFESTS = ['package.json', 'pyproject.toml', 'go.mod', 'Cargo.toml', 'Gemfile', 'pom.xml', 'composer.json']
-const SKIP = new Set(['node_modules', '.git', 'dist', 'build', '.next', 'venv', '.venv', 'vendor', 'target', 'docs', 'examples', 'test', 'tests'])
+const MANIFESTS = [
+  'package.json',
+  'pyproject.toml',
+  'go.mod',
+  'Cargo.toml',
+  'Gemfile',
+  'pom.xml',
+  'composer.json'
+]
+const SKIP = new Set([
+  'node_modules',
+  '.git',
+  'dist',
+  'build',
+  '.next',
+  'venv',
+  '.venv',
+  'vendor',
+  'target',
+  'docs',
+  'examples',
+  'test',
+  'tests'
+])
 
 const hasManifest = (dir: string): boolean => MANIFESTS.some((m) => existsSync(join(dir, m)))
 
@@ -79,11 +101,16 @@ function workspaceDirs(root: string): string[] {
   } catch {
     /* no pnpm workspace */
   }
-  return patterns.filter((p) => !p.startsWith('!')).flatMap((p) => expandGlob(root, p)).filter(hasManifest)
+  return patterns
+    .filter((p) => !p.startsWith('!'))
+    .flatMap((p) => expandGlob(root, p))
+    .filter(hasManifest)
 }
 
 function composeDirs(root: string): string[] {
-  const file = ['docker-compose.yml', 'docker-compose.yaml', 'compose.yml', 'compose.yaml'].find((f) => existsSync(join(root, f)))
+  const file = ['docker-compose.yml', 'docker-compose.yaml', 'compose.yml', 'compose.yaml'].find(
+    (f) => existsSync(join(root, f))
+  )
   if (!file) return []
   const text = readFileSync(join(root, file), 'utf8')
   return [...text.matchAll(/^\s+(?:build:\s*|context:\s*)['"]?(\.[^'"\s]*)/gm)]

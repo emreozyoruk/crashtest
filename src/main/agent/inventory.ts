@@ -37,9 +37,16 @@ const SCHEMA = {
   properties: {
     productName: { type: 'string' },
     summary: { type: 'string', description: '2-3 sentences: what this product does and for whom' },
-    appType: { type: 'string', description: 'web, api, web+api, mobile, desktop, cli, library or other' },
+    appType: {
+      type: 'string',
+      description: 'web, api, web+api, mobile, desktop, cli, library or other'
+    },
     stack: { type: 'array', items: { type: 'string' } },
-    journeys: { type: 'array', items: { type: 'string' }, description: 'Ordered as a user meets them' },
+    journeys: {
+      type: 'array',
+      items: { type: 'string' },
+      description: 'Ordered as a user meets them'
+    },
     surfaces: {
       type: 'array',
       items: {
@@ -48,11 +55,26 @@ const SCHEMA = {
           id: { type: 'string', description: 'Short unique id, e.g. op-create-article' },
           kind: {
             type: 'string',
-            enum: ['screen', 'action', 'operation', 'job', 'integration', 'role', 'entity', 'public', 'client', 'limit', 'ai']
+            enum: [
+              'screen',
+              'action',
+              'operation',
+              'job',
+              'integration',
+              'role',
+              'entity',
+              'public',
+              'client',
+              'limit',
+              'ai'
+            ]
           },
           name: { type: 'string' },
           location: { type: 'string' },
-          details: { type: 'string', description: 'What it does, inputs, rules, states, who may use it' },
+          details: {
+            type: 'string',
+            description: 'What it does, inputs, rules, states, who may use it'
+          },
           journey: { type: 'string', description: 'One of journeys' }
         },
         required: ['id', 'kind', 'name', 'location', 'details', 'journey']
@@ -78,7 +100,12 @@ export async function buildInventory(opts: {
   signal?: AbortSignal
 }): Promise<AgentRunResult<Inventory>> {
   const graph = await graphServer(opts.workdir)
-  if (Object.keys(graph).length) postMessage(opts.projectId, 'activity', 'Entire Graph is on: searching the code by symbols, not by text')
+  if (Object.keys(graph).length)
+    postMessage(
+      opts.projectId,
+      'activity',
+      'Entire Graph is on: searching the code by symbols, not by text'
+    )
   const scope = opts.productPaths?.length
     ? `Focus on these parts of the repository (the product the user chose): ${opts.productPaths.join(', ')}. ` +
       'Read shared packages they import when needed, but inventory only this product.'

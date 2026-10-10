@@ -14,7 +14,13 @@ const STATUS_LABEL: Record<ScenarioStatus, string> = {
 
 export function StatusGlyph({ status }: { status: ScenarioStatus }): React.JSX.Element {
   if (status === 'running') return <Marker size={12} spin />
-  return <span className={`status ${status}`} title={STATUS_LABEL[status]} aria-label={STATUS_LABEL[status]} />
+  return (
+    <span
+      className={`status ${status}`}
+      title={STATUS_LABEL[status]}
+      aria-label={STATUS_LABEL[status]}
+    />
+  )
 }
 
 export default function ScenariosView({ project }: { project: Project }): React.JSX.Element {
@@ -25,11 +31,15 @@ export default function ScenariosView({ project }: { project: Project }): React.
   const working = isWorking(project)
 
   const visible = useMemo(
-    () => project.scenarios.filter((s) => priorities.has(s.priority) && (statusFilter === 'all' || s.status === statusFilter)),
+    () =>
+      project.scenarios.filter(
+        (s) => priorities.has(s.priority) && (statusFilter === 'all' || s.status === statusFilter)
+      ),
     [project.scenarios, priorities, statusFilter]
   )
   const journeys = [...new Set(visible.map((s) => s.journey))]
-  const count = (st: ScenarioStatus): number => project.scenarios.filter((s) => s.status === st).length
+  const count = (st: ScenarioStatus): number =>
+    project.scenarios.filter((s) => s.status === st).length
   const open = project.scenarios.find((s) => s.id === openId)
 
   const togglePriority = (p: Priority): void => {
@@ -52,11 +62,21 @@ export default function ScenariosView({ project }: { project: Project }): React.
       <div className="scenario-list">
         <div className="toolbar">
           {(['P1', 'P2', 'P3'] as Priority[]).map((p) => (
-            <button key={p} className={`chip ${priorities.has(p) ? 'on' : ''}`} onClick={() => togglePriority(p)} aria-pressed={priorities.has(p)}>
+            <button
+              key={p}
+              className={`chip ${priorities.has(p) ? 'on' : ''}`}
+              onClick={() => togglePriority(p)}
+              aria-pressed={priorities.has(p)}
+            >
               {p} <span>{project.scenarios.filter((s) => s.priority === p).length}</span>
             </button>
           ))}
-          <select className="chip" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as ScenarioStatus | 'all')} aria-label="Filter by status">
+          <select
+            className="chip"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as ScenarioStatus | 'all')}
+            aria-label="Filter by status"
+          >
             <option value="all">Any status</option>
             {Object.entries(STATUS_LABEL).map(([k, v]) => (
               <option key={k} value={k}>
@@ -65,10 +85,18 @@ export default function ScenariosView({ project }: { project: Project }): React.
             ))}
           </select>
           <div className="tally">
-            <span><StatusGlyph status="passed" /> {count('passed')}</span>
-            <span><StatusGlyph status="broken" /> {count('broken')}</span>
-            <span><StatusGlyph status="skipped" /> {count('skipped')}</span>
-            <span><StatusGlyph status="not_run" /> {count('not_run')}</span>
+            <span>
+              <StatusGlyph status="passed" /> {count('passed')}
+            </span>
+            <span>
+              <StatusGlyph status="broken" /> {count('broken')}
+            </span>
+            <span>
+              <StatusGlyph status="skipped" /> {count('skipped')}
+            </span>
+            <span>
+              <StatusGlyph status="not_run" /> {count('not_run')}
+            </span>
           </div>
           <div className="grow" />
           {working ? (
@@ -76,7 +104,11 @@ export default function ScenariosView({ project }: { project: Project }): React.
               <Marker size={12} spin /> Stop run
             </button>
           ) : (
-            <button className="btn primary" disabled={!runIds.length} onClick={() => void window.api.startRun(project.id, runIds)}>
+            <button
+              className="btn primary"
+              disabled={!runIds.length}
+              onClick={() => void window.api.startRun(project.id, runIds)}
+            >
               {selected.size ? `Start ${selected.size} selected` : `Start ${visible.length} shown`}
             </button>
           )}
@@ -86,7 +118,9 @@ export default function ScenariosView({ project }: { project: Project }): React.
             <input
               type="checkbox"
               checked={allVisibleSelected}
-              onChange={() => setSelected(allVisibleSelected ? new Set() : new Set(visible.map((s) => s.id)))}
+              onChange={() =>
+                setSelected(allVisibleSelected ? new Set() : new Set(visible.map((s) => s.id)))
+              }
               aria-label="Select all shown"
             />
             <span>Select all</span>
@@ -100,8 +134,18 @@ export default function ScenariosView({ project }: { project: Project }): React.
                   <span className="n">{rows.length}</span>
                 </h3>
                 {rows.map((s) => (
-                  <div key={s.id} className={`row ${openId === s.id ? 'selected' : ''}`} onClick={() => setOpenId(s.id)}>
-                    <input type="checkbox" checked={selected.has(s.id)} onClick={(e) => e.stopPropagation()} onChange={() => toggle(s)} aria-label={`Select ${s.id}`} />
+                  <div
+                    key={s.id}
+                    className={`row ${openId === s.id ? 'selected' : ''}`}
+                    onClick={() => setOpenId(s.id)}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selected.has(s.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={() => toggle(s)}
+                      aria-label={`Select ${s.id}`}
+                    />
                     <span className="id">{s.id}</span>
                     <span className={`prio ${s.priority}`}>{s.priority}</span>
                     <span className="title">{s.title}</span>

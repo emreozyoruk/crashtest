@@ -24,7 +24,10 @@ function connect(target: SshTarget): Promise<Client> {
       readyTimeout: 15_000,
       ...(target.privateKey ? { privateKey: target.privateKey } : { password: target.password })
     }
-    client.once('ready', () => resolve(client)).once('error', reject).connect(config)
+    client
+      .once('ready', () => resolve(client))
+      .once('error', reject)
+      .connect(config)
   })
 }
 
@@ -50,7 +53,8 @@ function exec(client: Client, command: string, timeoutMs: number): Promise<Shell
 // Used by Settings and before every VDS run: returns null when the server is reachable.
 export async function testSsh(target: SshTarget): Promise<string | null> {
   if (!target.host || !target.username) return 'No server set. Add host and username in Settings.'
-  if (!target.password && !target.privateKey) return 'No password or private key set for the server.'
+  if (!target.password && !target.privateKey)
+    return 'No password or private key set for the server.'
   try {
     const client = await connect(target)
     const res = await exec(client, 'uname -sm && (command -v git || echo "git missing")', 15_000)
@@ -61,7 +65,11 @@ export async function testSsh(target: SshTarget): Promise<string | null> {
   }
 }
 
-export async function createSshRuntime(target: SshTarget, appDir: string, env: Record<string, string>): Promise<Runtime> {
+export async function createSshRuntime(
+  target: SshTarget,
+  appDir: string,
+  env: Record<string, string>
+): Promise<Runtime> {
   const client = await connect(target)
   const procs: BackgroundProcess[] = []
   const tunnels: Server[] = []
@@ -79,7 +87,9 @@ export async function createSshRuntime(target: SshTarget, appDir: string, env: R
       const logFile = `${appDir}/.crashtest/logs/${name}.log`
       await exec(
         client,
-        inDir(`mkdir -p .crashtest/logs && (setsid nohup bash -lc ${JSON.stringify(command)} >> ${logFile} 2>&1 & echo $! > .crashtest/${name}.pid)`),
+        inDir(
+          `mkdir -p .crashtest/logs && (setsid nohup bash -lc ${JSON.stringify(command)} >> ${logFile} 2>&1 & echo $! > .crashtest/${name}.pid)`
+        ),
         20_000
       )
       const proc = { name, command, logFile }
@@ -87,7 +97,8 @@ export async function createSshRuntime(target: SshTarget, appDir: string, env: R
       return proc
     },
     async readLog(name, lines = 80) {
-      return (await exec(client, `tail -n ${lines} ${appDir}/.crashtest/logs/${name}.log`, 15_000)).output
+      return (await exec(client, `tail -n ${lines} ${appDir}/.crashtest/logs/${name}.log`, 15_000))
+        .output
     },
     exposePort(port) {
       return new Promise((resolve, reject) => {
@@ -109,7 +120,11 @@ export async function createSshRuntime(target: SshTarget, appDir: string, env: R
     background: () => procs,
     async dispose() {
       for (const p of procs) {
-        await exec(client, `cd ${appDir} && kill -- -$(cat .crashtest/${p.name}.pid) 2>/dev/null || kill $(cat .crashtest/${p.name}.pid) 2>/dev/null`, 10_000)
+        await exec(
+          client,
+          `cd ${appDir} && kill -- -$(cat .crashtest/${p.name}.pid) 2>/dev/null || kill $(cat .crashtest/${p.name}.pid) 2>/dev/null`,
+          10_000
+        )
       }
       procs.length = 0
       for (const t of tunnels) t.close()

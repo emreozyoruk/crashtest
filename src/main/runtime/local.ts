@@ -40,7 +40,12 @@ export function createLocalRuntime(appDir: string, env: Record<string, string>):
       const logFile = join(logDir, `${name}.log`)
       const fd = openSync(logFile, 'a')
       // detached gives the process its own group so dispose() can stop its children too.
-      const child = spawn('/bin/zsh', ['-lc', command], { cwd: appDir, env: shellEnv, detached: true, stdio: ['ignore', fd, fd] })
+      const child = spawn('/bin/zsh', ['-lc', command], {
+        cwd: appDir,
+        env: shellEnv,
+        detached: true,
+        stdio: ['ignore', fd, fd]
+      })
       child.unref()
       const proc = { name, command, logFile, pid: child.pid ?? -1 }
       procs.push(proc)

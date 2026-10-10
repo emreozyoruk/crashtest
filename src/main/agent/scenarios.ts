@@ -35,17 +35,33 @@ const SCHEMA = {
       items: {
         type: 'object',
         properties: {
-          title: { type: 'string', description: 'Imperative, specific: "Reject an approval with a reason"' },
+          title: {
+            type: 'string',
+            description: 'Imperative, specific: "Reject an approval with a reason"'
+          },
           who: { type: 'string' },
           startingState: { type: 'string' },
           steps: { type: 'array', items: { type: 'string' } },
           expected: { type: 'string', description: 'Observable result a person can check' },
           priority: { type: 'string', enum: ['P1', 'P2', 'P3'] },
-          dimension: { type: 'string', description: 'Which dimension this exercises, e.g. "wrong input"' },
+          dimension: {
+            type: 'string',
+            description: 'Which dimension this exercises, e.g. "wrong input"'
+          },
           surfaceIds: { type: 'array', items: { type: 'string' } },
           runnable: { type: 'boolean' }
         },
-        required: ['title', 'who', 'startingState', 'steps', 'expected', 'priority', 'dimension', 'surfaceIds', 'runnable']
+        required: [
+          'title',
+          'who',
+          'startingState',
+          'steps',
+          'expected',
+          'priority',
+          'dimension',
+          'surfaceIds',
+          'runnable'
+        ]
       }
     }
   },
@@ -57,7 +73,11 @@ type Draft = Omit<Scenario, 'id' | 'journey' | 'status'>
 const CHUNK = 18
 const CONCURRENCY = 5
 
-async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+async function mapLimit<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>
+): Promise<R[]> {
   const results: R[] = new Array(items.length)
   let next = 0
   const worker = async (): Promise<void> => {
@@ -72,15 +92,23 @@ async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promis
 
 function chunks(inv: Inventory): { journey: string; surfaces: Surface[] }[] {
   const out: { journey: string; surfaces: Surface[] }[] = []
-  const journeys = [...inv.journeys, ...new Set(inv.surfaces.map((s) => s.journey).filter((j) => !inv.journeys.includes(j)))]
+  const journeys = [
+    ...inv.journeys,
+    ...new Set(inv.surfaces.map((s) => s.journey).filter((j) => !inv.journeys.includes(j)))
+  ]
   for (const journey of journeys) {
     const surfaces = inv.surfaces.filter((s) => s.journey === journey)
-    for (let i = 0; i < surfaces.length; i += CHUNK) out.push({ journey, surfaces: surfaces.slice(i, i + CHUNK) })
+    for (let i = 0; i < surfaces.length; i += CHUNK)
+      out.push({ journey, surfaces: surfaces.slice(i, i + CHUNK) })
   }
   return out
 }
 
-const normalize = (t: string): string => t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+const normalize = (t: string): string =>
+  t
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
 
 export interface ScenarioProgress {
   done: number
@@ -89,9 +117,13 @@ export interface ScenarioProgress {
   found: number
 }
 
-export async function generateScenarios(inv: Inventory, onProgress: (p: ScenarioProgress) => void): Promise<Scenario[]> {
+export async function generateScenarios(
+  inv: Inventory,
+  onProgress: (p: ScenarioProgress) => void
+): Promise<Scenario[]> {
   const parts = chunks(inv)
-  const context = `Product: ${inv.productName}\nWhat it does: ${inv.summary}\nApp type: ${inv.appType}\nStack: ${inv.stack.join(', ')}\n` +
+  const context =
+    `Product: ${inv.productName}\nWhat it does: ${inv.summary}\nApp type: ${inv.appType}\nStack: ${inv.stack.join(', ')}\n` +
     `All journeys, in order: ${inv.journeys.join(' → ')}`
   let done = 0
   let found = 0
@@ -100,7 +132,8 @@ export async function generateScenarios(inv: Inventory, onProgress: (p: Scenario
     const res = await structuredCall<{ scenarios: Draft[] }>({
       model: SCENARIO_MODEL,
       system: SYSTEM,
-      prompt: `${context}\n\nJourney: "${part.journey}"\nSurfaces in this journey:\n${JSON.stringify(part.surfaces, null, 1)}\n\n` +
+      prompt:
+        `${context}\n\nJourney: "${part.journey}"\nSurfaces in this journey:\n${JSON.stringify(part.surfaces, null, 1)}\n\n` +
         'Write the scenarios for these surfaces.',
       toolName: 'report_scenarios',
       schema: SCHEMA,
@@ -125,26 +158,49 @@ export async function generateScenarios(inv: Inventory, onProgress: (p: Scenario
     const i = inv.journeys.indexOf(j)
     return i === -1 ? inv.journeys.length : i
   }
-  merged.sort((a, b) => journeyIndex(a.journey) - journeyIndex(b.journey) || order[a.priority] - order[b.priority])
-  return merged.map((s, i) => ({ ...s, id: `S-${String(i + 1).padStart(3, '0')}`, status: 'not_run' }))
+  merged.sort(
+    (a, b) =>
+      journeyIndex(a.journey) - journeyIndex(b.journey) || order[a.priority] - order[b.priority]
+  )
+  return merged.map((s, i) => ({
+    ...s,
+    id: `S-${String(i + 1).padStart(3, '0')}`,
+    status: 'not_run'
+  }))
 }
 
-export function scenariosMarkdown(projectName: string, inv: Inventory, scenarios: Scenario[]): string {
+export function scenariosMarkdown(
+  projectName: string,
+  inv: Inventory,
+  scenarios: Scenario[]
+): string {
   const icon = { not_run: '⬜', running: '🔄', passed: '✅', broken: '❌', skipped: '⏭' }
-  const counts = inv.surfaces.reduce<Record<string, number>>((acc, s) => ({ ...acc, [s.kind]: (acc[s.kind] ?? 0) + 1 }), {})
+  const counts = inv.surfaces.reduce<Record<string, number>>(
+    (acc, s) => ({ ...acc, [s.kind]: (acc[s.kind] ?? 0) + 1 }),
+    {}
+  )
   const lines = [
     `# Scenarios — ${projectName}`,
     '',
     `> ${inv.summary}`,
     '',
     '## Inventory',
-    Object.entries(counts).map(([k, v]) => `${v} ${k}`).join(' · '),
+    Object.entries(counts)
+      .map(([k, v]) => `${v} ${k}`)
+      .join(' · '),
     ''
   ]
   for (const journey of [...new Set(scenarios.map((s) => s.journey))]) {
-    lines.push(`## ${journey}`, '', '| ID | P | Scenario | Expected | Status |', '|---|---|---|---|---|')
+    lines.push(
+      `## ${journey}`,
+      '',
+      '| ID | P | Scenario | Expected | Status |',
+      '|---|---|---|---|---|'
+    )
     for (const s of scenarios.filter((x) => x.journey === journey)) {
-      lines.push(`| ${s.id} | ${s.priority} | ${s.title} | ${s.expected.replace(/\|/g, '/')} | ${icon[s.status]} |`)
+      lines.push(
+        `| ${s.id} | ${s.priority} | ${s.title} | ${s.expected.replace(/\|/g, '/')} | ${icon[s.status]} |`
+      )
     }
     lines.push('')
   }

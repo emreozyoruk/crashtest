@@ -14,7 +14,9 @@ function describeDir(root: string, dir: string): string {
   if (!existsSync(pkgPath)) return `- ${dir}`
   try {
     const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'))
-    const deps = Object.keys({ ...pkg.dependencies }).slice(0, 15).join(', ')
+    const deps = Object.keys({ ...pkg.dependencies })
+      .slice(0, 15)
+      .join(', ')
     return `- ${dir}: name=${pkg.name ?? '?'}; description=${pkg.description ?? ''}; scripts=${Object.keys(pkg.scripts ?? {}).join(',')}; deps=${deps}`
   } catch {
     return `- ${dir}`
@@ -42,7 +44,11 @@ export async function groupProducts(root: string, dirs: string[]): Promise<Produ
             properties: {
               name: { type: 'string', description: 'Short human name, e.g. "Admin dashboard"' },
               description: { type: 'string', description: 'One sentence' },
-              paths: { type: 'array', items: { type: 'string' }, description: 'Package directories belonging to it' }
+              paths: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Package directories belonging to it'
+              }
             },
             required: ['name', 'description', 'paths']
           }
