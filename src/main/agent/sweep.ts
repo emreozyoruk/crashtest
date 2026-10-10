@@ -21,6 +21,10 @@ the API, read server logs, and seed test data. The source code is in your workin
 Rules:
 - Set up the starting state the scenario names (create test users and data through the UI or API). Never use real
   people's data.
+- Sign in the way a real user does — through the app's sign-in form. Do not hand-write tokens into localStorage or
+  cookies; that skips the app's own state setup and produces blank or broken pages that are not real bugs.
+- If a page renders blank or half-drawn, read the browser console and network errors before deciding anything.
+  A verdict must rest on what you actually checked; if part of the scenario could not be checked, say which part.
 - Do the steps in the real app. Take a screenshot at the decisive moment and LOOK at it. Read the browser console
   and server logs. A 200 response is not proof; what the user sees is.
 - "passed" means you saw it work. If the app behaves differently from the expected result, it is "broken".

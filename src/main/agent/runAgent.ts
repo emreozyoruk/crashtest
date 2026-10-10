@@ -93,6 +93,8 @@ export async function runAgent<T = string>(opts: AgentRunOptions): Promise<Agent
       model: AGENT_MODEL,
       cwd: opts.cwd,
       systemPrompt: opts.systemPrompt,
+      // Only the built-in tools this phase needs are even offered to the model; MCP tools come from mcpServers.
+      tools: opts.allowedTools.filter((t) => !t.startsWith('mcp__')),
       allowedTools: opts.allowedTools,
       // Anything not explicitly allowed is denied instead of prompting.
       permissionMode: 'dontAsk',

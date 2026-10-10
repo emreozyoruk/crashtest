@@ -5,6 +5,11 @@ import icon from '../../resources/icon.png?asset'
 import { loadStore } from './store'
 import { registerIpc } from './ipc'
 import { initTelemetry, shutdownTelemetry } from './telemetry'
+import { homedir } from 'os'
+
+// Apps launched from Finder/Dock get a minimal PATH; add the usual tool locations so the agent
+// can find node, git, entire and the package managers of the repo under test.
+process.env.PATH = [join(homedir(), '.local/bin'), '/opt/homebrew/bin', '/usr/local/bin', process.env.PATH].join(':')
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({

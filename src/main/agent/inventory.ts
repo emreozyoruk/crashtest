@@ -1,6 +1,7 @@
 import type { Inventory } from '../../shared/types'
 import { runAgent, type AgentRunResult } from './runAgent'
 import { GRAPH_TOOLS, graphServer } from './graphTools'
+import { postMessage } from '../events'
 
 const SYSTEM = `You are Crashtest's inventory agent. Your job is Phase 1 of a scenario sweep: build a complete
 inventory of what an application can do, read from its CODE, not its docs. Docs describe intent; code is what users get.
@@ -77,6 +78,7 @@ export async function buildInventory(opts: {
   signal?: AbortSignal
 }): Promise<AgentRunResult<Inventory>> {
   const graph = await graphServer(opts.workdir)
+  if (Object.keys(graph).length) postMessage(opts.projectId, 'activity', 'Entire Graph is on: searching the code by symbols, not by text')
   const scope = opts.productPaths?.length
     ? `Focus on these parts of the repository (the product the user chose): ${opts.productPaths.join(', ')}. ` +
       'Read shared packages they import when needed, but inventory only this product.'
