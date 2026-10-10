@@ -1,0 +1,60 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "0268d6195b9b",
+  "session_id": "0980f640-3a33-4eb8-9f12-89accc563cc3",
+  "strategy": "manual-commit",
+  "created_at": "2026-10-10T12:36:47.350213Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "docs/entire/README.md",
+    "docs/entire/dispatch-2026-10-10.md"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5",
+  "turn_id": "fad042edcd93",
+  "checkpoint_transcript_start": 1798,
+  "transcript_lines_at_start": 1798,
+  "compact_transcript_start": 301,
+  "token_usage": {
+    "input_tokens": 8,
+    "cache_creation_tokens": 6483,
+    "cache_read_tokens": 2061707,
+    "output_tokens": 1983,
+    "api_call_count": 4
+  },
+  "session_metrics": {
+    "turn_count": 6
+  },
+  "summary": {
+    "intent": "Record evidence of a `pkill` incident by locating its trace in neatlogs and saving the trace ID in an Entire dispatch document, then commit and push it.",
+    "outcome": "The assistant searched neatlogs traces for the `pkill` event, generated an Entire dispatch with a checkpoint count, saved it to docs/entire/dispatch-2026-10-10.md and updated docs/entire/README.md. It then committed, scanned and pushed. The transcript does not show the trace ID found or the scan result.",
+    "learnings": {
+      "repo": [
+        "Entire dispatch evidence is kept under docs/entire/, with one dated file per dispatch (dispatch-YYYY-MM-DD.md) and an index in README.md.",
+        "The commit flow bundles saving the dispatch, committing, running a scan and pushing in a single step."
+      ],
+      "code": [],
+      "workflow": [
+        "neatlogs MCP search_traces can find the trace of a specific incident, such as a `pkill`, so its trace ID can be recorded as evidence.",
+        "Independent searches can be run in parallel, as the two search_traces calls were."
+      ]
+    },
+    "friction": [
+      "The transcript does not show whether the trace was found on the first search. Two search_traces calls were needed."
+    ],
+    "open_items": []
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-10-10T12:36:42.630409Z",
+    "agent_lines": 41,
+    "agent_removed": 0,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 41,
+    "total_lines_changed": 41,
+    "agent_percentage": 100,
+    "metric_version": 2
+  }
+}
