@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "df9992c9ebc6",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src/renderer/src/App.tsx",
+    "src/renderer/src/components/ChatView.tsx",
+    "src/renderer/src/components/ScenarioDetail.tsx",
+    "src/renderer/src/components/ScenariosView.tsx",
+    "src/renderer/src/components/Sidebar.tsx",
+    "src/renderer/src/working.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/df/9992c9ebc6/0/metadata.json",
+      "transcript": "/df/9992c9ebc6/0/full.jsonl",
+      "compact_transcript": "/df/9992c9ebc6/0/transcript.jsonl",
+      "content_hash": "/df/9992c9ebc6/0/content_hash.txt",
+      "prompt": "/df/9992c9ebc6/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 78,
+    "cache_creation_tokens": 51896,
+    "cache_read_tokens": 11781591,
+    "output_tokens": 17532,
+    "api_call_count": 39
+  }
+}
