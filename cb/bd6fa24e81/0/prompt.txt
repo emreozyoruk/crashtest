@@ -1,0 +1,7 @@
+<task-notification>
+<task-id>b3af1z4kd</task-id>
+<tool-use-id>toolu_01S7xZvSrim13moTYbtt7mLY</tool-use-id>
+<output-file>/private/tmp/claude-502/-Users-emreozyoruk-Desktop-project-hackaton/56513bf4-5efb-4d2d-82ae-f739e0b24cc4/tasks/b3af1z4kd.output</output-file>
+<status>completed</status>
+<summary>Background command "Run all P1 scenarios on kutt" completed (exit code 0)</summary>
+</task-notification>
