@@ -45,7 +45,7 @@ GitHub link ─► Intake ─► Inventory agent ─► Scenario writer ─► [
 |---|---|
 | [neatlogs](https://neatlogs.com) | Every phase is its own traced workflow (`repo-inventory`, `scenario-generation`, `app-bootstrap`, `scenario-sweep`, `app-recovery`, `project-chat`), grouped per project. Two custom detections — **Bug found by Crashtest** and **Unverified verdict** — and before/after traces drove real fixes. Our own build sessions are traced too. [Evidence](docs/evidence/neatlogs-baselines.md) |
 | [Entire](https://entire.io) | Checkpoints on our commits ([repo on Entire](https://entire.io/gh/emreozyoruk/crashtest), first checkpoint [`97c75579b386`](https://entire.io/gh/emreozyoruk/crashtest/commit/74641efd901999e96d69fd85f69dde70f3aa0a62)), plus **Entire Graph inside the product**: the inventory and sweep agents get graph search / definitions / callers / blast-radius tools over the repo under test. [Evidence](docs/entire/README.md) |
-| [cfo.ai](https://cfo.ai) | Business plan for Crashtest: pricing, unit costs taken from neatlogs traces, revenue scenarios and runway. |
+| [cfo.ai](https://cfo.ai) | [Business plan for Crashtest](https://app.cfo.ai/s/--rWFPOxuMvaL0nN) (read-only link; [Upside](https://app.cfo.ai/s/C9DgOonrAXn3DhqQ), [Downside](https://app.cfo.ai/s/e_GPD5Z-hJGywRX7)): Pro $29 / Cloud $299 pricing, unit costs taken from our neatlogs traces ($0.117 per scenario run, $0.815 per repo inventory), customers → revenue → P&L → cash, and three scenarios. Finding: the first engineer hire decides the runway. [Evidence](docs/cfoai/README.md) |
 
 ## Run it
 

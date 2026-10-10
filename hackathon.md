@@ -48,6 +48,12 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - First clean checkpoint from a fresh session: [`97c75579b386`](https://entire.io/gh/emreozyoruk/crashtest/commit/74641efd901999e96d69fd85f69dde70f3aa0a62) on commit `74641ef`. Scanned against every known secret before pushing `entire/checkpoints/v1` (only harmless matches: a regex pattern and an env var name). Repo mirrored on Entire: https://entire.io/gh/emreozyoruk/crashtest
 - Entire evidence in [docs/entire/](docs/entire/README.md): graph snapshot of Crashtest (70 files, 723 symbols, 1,837 relations) and `entire graph stats` over our build sessions.
 
+### 2026-10-10 (Sat) — 01:05–01:25 PDT — cfo.ai business plan
+- Built the plan in cfo.ai through its MCP server: [read-only link](https://app.cfo.ai/s/--rWFPOxuMvaL0nN). Pricing Pro $29 (bring your own key) / Cloud $299 (we run it). Unit costs come from our own neatlogs traces: **$0.117 per scenario run** (mean of 8 sweeps), **$0.815 per repo inventory**.
+- Customers → revenue → P&L → cash, monthly to Dec 2028, with Upside and Downside scenarios. Gross margin ~79%. Base: cash bottoms at $7.7k in Mar 2028 and turns cash-flow positive in Apr 2028.
+- The model changed a decision: in Downside, hiring the first engineer at month 6 runs out of cash in Nov 2027; hiring at month 18 keeps $51k. So the hire is gated on MRR, not the calendar. Details: [docs/cfoai/](docs/cfoai/README.md).
+- Cleanup: fixed the two eslint errors (effect setState, non-component export) and formatted `src` with the repo's prettier config — eslint and typecheck are clean.
+
 ## Building in public
 - 2026-10-09 announcement: https://x.com/kurokotetsuyami/status/2108778646320390337
 
@@ -62,5 +68,5 @@ Pending.
 - [ ] Demo video ≤ 3 min covering neatlogs, Entire and cfo.ai
 - [ ] neatlogs evidence (before/after traces, failure recovery run)
 - [x] Entire checkpoint link + ID — [`97c75579b386`](https://entire.io/gh/emreozyoruk/crashtest/commit/74641efd901999e96d69fd85f69dde70f3aa0a62)
-- [ ] cfo.ai business plan
+- [x] cfo.ai business plan — https://app.cfo.ai/s/--rWFPOxuMvaL0nN
 - [ ] Quote post of the official neatlogs submission post (Mon Oct 12, 06:30–11:25 PDT)
