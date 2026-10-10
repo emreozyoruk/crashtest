@@ -51,6 +51,17 @@ export function createLocalRuntime(appDir: string, env: Record<string, string>):
       procs.push(proc)
       return proc
     },
+    async stopBackground(name) {
+      const i = procs.findIndex((p) => p.name === name)
+      if (i === -1) return false
+      try {
+        process.kill(-procs[i].pid, 'SIGTERM')
+      } catch {
+        /* already exited */
+      }
+      procs.splice(i, 1)
+      return true
+    },
     async readLog(name, lines = 80) {
       const file = join(logDir, `${name}.log`)
       if (!existsSync(file)) return `(no log named ${name})`

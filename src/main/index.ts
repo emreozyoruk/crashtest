@@ -35,6 +35,13 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => mainWindow.show())
 
+  // Runs live in the main process, so a crashed window loses nothing: reload it and the
+  // renderer re-reads every project from the store. A 72-minute sweep once lost its window.
+  mainWindow.webContents.on('render-process-gone', (_, details) => {
+    console.error(`Renderer gone (${details.reason}, exit ${details.exitCode}); reloading`)
+    if (!mainWindow.isDestroyed()) mainWindow.webContents.reload()
+  })
+
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }

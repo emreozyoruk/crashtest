@@ -65,6 +65,8 @@ function describeTool(name: string, input: Record<string, unknown>, cwd: string)
       return `Running \`${String(input.command).slice(0, 120)}\``
     case 'mcp__app__start_background':
       return `Starting ${input.name}: \`${String(input.command).slice(0, 100)}\``
+    case 'mcp__app__stop_background':
+      return `Stopping ${input.name}`
     case 'mcp__app__read_log':
       return `Reading the ${input.name} log`
     case 'mcp__app__expose_port':

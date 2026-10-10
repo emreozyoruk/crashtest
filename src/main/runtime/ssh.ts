@@ -77,6 +77,8 @@ export async function createSshRuntime(
     .map(([k, v]) => `export ${k}=${JSON.stringify(v)}`)
     .join('; ')
   const inDir = (cmd: string): string => `mkdir -p ${appDir} && cd ${appDir} && ${exports}; ${cmd}`
+  const killCommand = (name: string): string =>
+    `cd ${appDir} && kill -- -$(cat .crashtest/${name}.pid) 2>/dev/null || kill $(cat .crashtest/${name}.pid) 2>/dev/null`
 
   return {
     kind: 'vds',
@@ -95,6 +97,13 @@ export async function createSshRuntime(
       const proc = { name, command, logFile }
       procs.push(proc)
       return proc
+    },
+    async stopBackground(name) {
+      const i = procs.findIndex((p) => p.name === name)
+      if (i === -1) return false
+      await exec(client, killCommand(name), 10_000)
+      procs.splice(i, 1)
+      return true
     },
     async readLog(name, lines = 80) {
       return (await exec(client, `tail -n ${lines} ${appDir}/.crashtest/logs/${name}.log`, 15_000))
@@ -120,11 +129,7 @@ export async function createSshRuntime(
     background: () => procs,
     async dispose() {
       for (const p of procs) {
-        await exec(
-          client,
-          `cd ${appDir} && kill -- -$(cat .crashtest/${p.name}.pid) 2>/dev/null || kill $(cat .crashtest/${p.name}.pid) 2>/dev/null`,
-          10_000
-        )
+        await exec(client, killCommand(p.name), 10_000)
       }
       procs.length = 0
       for (const t of tunnels) t.close()

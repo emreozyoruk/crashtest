@@ -18,6 +18,8 @@ export interface Runtime {
   appDir: string
   run(command: string, timeoutMs?: number): Promise<ShellResult>
   startBackground(name: string, command: string): Promise<BackgroundProcess>
+  // Stops a background process this runtime started, with its children.
+  stopBackground(name: string): Promise<boolean>
   readLog(name: string, lines?: number): Promise<string>
   // Returns a URL the browser on this Mac can open for a port of the app under test.
   exposePort(port: number): Promise<string>

@@ -5,9 +5,27 @@ import { loadSdk } from './runAgent'
 // MCP tools that let the agent operate the app under test through a Runtime (local or VDS).
 // Tool names surface to the agent as mcp__app__<name>.
 
-export const APP_TOOLS = ['shell', 'start_background', 'read_log', 'expose_port', 'http_get'].map(
-  (t) => `mcp__app__${t}`
-)
+export const APP_TOOLS = [
+  'shell',
+  'start_background',
+  'stop_background',
+  'read_log',
+  'expose_port',
+  'http_get'
+].map((t) => `mcp__app__${t}`)
+
+// The shell runs on the user's own machine. A scenario once had the agent run
+// `pkill -f "node index.js"`, which matches by name and can kill unrelated processes.
+// Name-matching and system-wide process control are refused; stop_background is the way.
+const UNSAFE =
+  /\b(pkill|killall|shutdown|reboot|halt|launchctl|osascript)\b|\bkill\s+(-\S+\s+)*-1\b/
+
+export function unsafeCommand(command: string): string | null {
+  return UNSAFE.test(command)
+    ? 'Refused: this command can stop or change processes outside the app under test. ' +
+        'Stop processes you started with stop_background, and only signal PIDs you started.'
+    : null
+}
 
 // Our tools are few and central to each phase, so load them up front instead of behind tool search.
 const LOAD = { alwaysLoad: true }
@@ -30,6 +48,8 @@ export async function appToolsServer(runtime: Runtime): Promise<Record<string, u
           'Run a short shell command in the project folder and return its output. Times out after 3 minutes; never use it for servers.',
           { command: z.string() },
           async ({ command }) => {
+            const refused = unsafeCommand(command)
+            if (refused) return text(refused)
             const res = await runtime.run(command)
             return text(`exit ${res.code}\n${res.output}`)
           }
@@ -39,9 +59,20 @@ export async function appToolsServer(runtime: Runtime): Promise<Record<string, u
           'Start a long-running process (dev server, API, worker). Output goes to a named log you can read with read_log.',
           { name: z.string().describe('Short name, e.g. "api" or "web"'), command: z.string() },
           async ({ name, command }) => {
+            const refused = unsafeCommand(command)
+            if (refused) return text(refused)
             const proc = await runtime.startBackground(name, command)
             return text(`started ${proc.name}; log: ${proc.logFile}`)
           }
+        ),
+        def(
+          'stop_background',
+          'Stop a background process you started with start_background, by its name.',
+          { name: z.string() },
+          async ({ name }) =>
+            text(
+              (await runtime.stopBackground(name)) ? `stopped ${name}` : `no process named ${name}`
+            )
         ),
         def(
           'read_log',
