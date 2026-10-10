@@ -118,7 +118,8 @@ export async function runScenario(opts: {
         ? `${opts.parallel - 1} other scenarios run against this same app at the same time. Never stop or restart ` +
           'the shared app or its database, and expect data you did not create. If the scenario needs a fresh or ' +
           'differently started instance, start your own copy on other ports with its own data directory, and stop it ' +
-          'when you are done.\n'
+          'when you are done. The machine is shared and small: for load or volume checks use the smallest data set ' +
+          'that shows the behaviour (hundreds of records, not thousands) and watch the memory of anything you start.\n'
         : '') +
       '\n' +
       `Scenario ${s.id} [${s.priority}] — ${s.title}\nWho: ${s.who}\nStarting state: ${s.startingState}\n` +
