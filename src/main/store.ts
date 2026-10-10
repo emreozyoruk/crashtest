@@ -27,7 +27,7 @@ function writeJson(file: string, value: unknown): void {
 const DEFAULT_SETTINGS: Settings = {
   defaultRunTarget: 'ask',
   runnerModel: 'sonnet',
-  parallelRuns: 1,
+  parallelRuns: 0,
   ssh: { host: '', port: 22, username: '' }
 }
 

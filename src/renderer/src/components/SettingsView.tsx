@@ -179,11 +179,11 @@ export default function SettingsView(): React.JSX.Element {
         <section>
           <h3>Scenarios at once</h3>
           <p className="hint">
-            Run several scenarios side by side against the same app. Faster, but they all share the
-            same app data.
+            Run several scenarios side by side against the same app. Auto measures the machine first
+            and picks what it can hold. They all share the same app data.
           </p>
           <div className="segmented" role="radiogroup" aria-label="Scenarios at once">
-            {[1, 2, 3, 4].map((n) => (
+            {[0, 1, 2, 3, 4].map((n) => (
               <button
                 key={n}
                 className={settings.parallelRuns === n ? 'on' : ''}
@@ -191,7 +191,7 @@ export default function SettingsView(): React.JSX.Element {
                 aria-checked={settings.parallelRuns === n}
                 onClick={() => update({ ...settings, parallelRuns: n })}
               >
-                {n}
+                {n === 0 ? 'Auto' : n}
               </button>
             ))}
           </div>

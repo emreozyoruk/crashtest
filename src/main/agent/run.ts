@@ -13,6 +13,7 @@ import { bootApp, type BootResult } from './bootstrap'
 import { runScenario } from './sweep'
 import { unsafeCommand } from './runtimeTools'
 import { findingsMarkdown, findingsSummary } from './report'
+import { pickParallel } from './capacity'
 
 // Start → choose Local/VDS → boot the app → run each scenario → recover if the app dies → report.
 
@@ -192,7 +193,11 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
       healing ??= recover(project, runtime, boot).finally(() => (healing = undefined))
       return healing
     }
-    const parallel = Math.max(1, Math.min(6, getSettings().parallelRuns))
+    const fixed = getSettings().parallelRuns
+    const capacity = fixed > 0 ? null : await pickParallel(runtime)
+    const parallel = capacity ? capacity.parallel : Math.min(6, fixed)
+    if (capacity)
+      postMessage(project.id, 'activity', `${capacity.why} Running ${parallel} at once.`)
 
     const worker = async (): Promise<void> => {
       for (let scenario = queue.shift(); scenario; scenario = queue.shift()) {
