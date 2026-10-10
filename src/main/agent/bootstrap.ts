@@ -64,6 +64,7 @@ export async function bootApp(opts: {
   localWorkdir: string
   inventory?: Inventory
   providedEnv: string[]
+  setupNotes?: string
   signal?: AbortSignal
 }): Promise<BootResult> {
   const hints = opts.inventory
@@ -77,6 +78,7 @@ export async function bootApp(opts: {
     prompt:
       `The app runs on ${opts.runtime.label} in ${opts.runtime.appDir}.\n${hints}\n` +
       `Env vars the user already provided (already exported for every command): ${opts.providedEnv.join(', ') || 'none'}.\n` +
+      (opts.setupNotes ? `Setup notes from the user (follow them):\n${opts.setupNotes}\n` : '') +
       'Get it running now.',
     allowedTools: APP_TOOLS,
     mcpServers: await appToolsServer(opts.runtime),

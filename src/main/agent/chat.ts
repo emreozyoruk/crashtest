@@ -3,7 +3,7 @@ import { wrapAnthropic, trace } from 'neatlogs'
 import type { Project } from '../../shared/types'
 import { getSettings, saveSettings } from '../store'
 import { setProjectEnvVar, setSecret, getProjectEnv } from '../secrets'
-import { postMessage } from '../events'
+import { postMessage, publishProject } from '../events'
 import { anthropicKey } from './runAgent'
 import { AGENT_MODEL } from './models'
 
@@ -38,6 +38,17 @@ const TOOLS: Anthropic.Tool[] = [
     }
   },
   {
+    name: 'save_setup_note',
+    description:
+      'Store an instruction from the user about setting the app up (a service to start, a flag, a test account). ' +
+      'The agent that boots the app reads these before every run.',
+    input_schema: {
+      type: 'object',
+      properties: { note: { type: 'string' } },
+      required: ['note']
+    }
+  },
+  {
     name: 'start_run',
     description:
       'Start running scenarios. Use "P1", "P2", "P3", "all", or explicit ids like ["S-004","S-010"].',
@@ -61,6 +72,7 @@ function context(project: Project): string {
   const env = Object.keys(getProjectEnv(project.id))
   lines.push(`Stored env vars: ${env.length ? env.join(', ') : 'none'}`)
   lines.push(`VDS configured: ${getSettings().ssh.host ? 'yes' : 'no'}`)
+  if (project.setupNotes) lines.push(`Setup notes: ${project.setupNotes}`)
   for (const s of project.scenarios.slice(0, 400)) {
     lines.push(
       `${s.id} [${s.priority}] [${s.status}] ${s.journey} — ${s.title}${s.finding ? ` — FINDING: ${s.finding.summary}` : ''}`
@@ -122,6 +134,12 @@ export async function chat(project: Project, text: string, startRun: StartRunFn)
         if (call.name === 'save_env_var') {
           setProjectEnvVar(project.id, String(input.key), String(input.value))
           postMessage(project.id, 'activity', `Saved ${input.key} (encrypted)`)
+          return { type: 'tool_result', tool_use_id: call.id, content: 'saved' }
+        }
+        if (call.name === 'save_setup_note') {
+          project.setupNotes = [project.setupNotes, String(input.note)].filter(Boolean).join('\n')
+          publishProject(project)
+          postMessage(project.id, 'activity', 'Saved a setup note for booting the app')
           return { type: 'tool_result', tool_use_id: call.id, content: 'saved' }
         }
         if (call.name === 'save_vds') {

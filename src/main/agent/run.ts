@@ -159,6 +159,7 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
           localWorkdir: project.workdir,
           inventory: project.inventory,
           providedEnv: Object.keys(getProjectEnv(project.id)),
+          setupNotes: project.setupNotes,
           signal
         })
     )

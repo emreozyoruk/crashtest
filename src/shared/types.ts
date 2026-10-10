@@ -96,6 +96,8 @@ export interface Project {
   phase: ProjectPhase
   createdAt: number
   inventory?: Inventory
+  // How to set the app up, from the user (services to start, flags, test accounts).
+  setupNotes?: string
   scenarios: Scenario[]
   messages: ChatMessage[]
 }
