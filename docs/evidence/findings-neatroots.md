@@ -23,7 +23,7 @@ neatlogs' head of product engineering ([the ask](https://x.com/kurokotetsuyami/s
 
 ## Verified findings
 
-Bugs 1–5 come from the 78 core scenarios; bugs 6–13 from the run of the remaining scenarios, which is still going.
+Bugs 1–5 come from the 78 core scenarios; bugs 6–15 from the run of the remaining scenarios, which is still going.
 
 ### 1. A JSON OTLP body with a non-array `resourceSpans` is accepted and silently dropped (S-047)
 - **Do:** `POST /v1/traces` with `Content-Type: application/json` and `{"resourceSpans": "oops"}`.
@@ -156,6 +156,21 @@ Bugs 1–5 come from the 78 core scenarios; bugs 6–13 from the run of the rema
   server up, the same command is rejected.
 - **Why:** `cli.ts:300-303` saves the mode directly when the server is down; only the server route validates it.
 - **Fix:** validate the mode in the CLI before either branch.
+
+### 14. `POST /api/imports/file` has no size limit and a big file crashes the server (S-313)
+- **Do:** upload a ~326 MB trace file through the web app's import (or `POST /api/imports/file`).
+- **Actual:** the body is parsed in one go and the process dies with a V8 heap out-of-memory error, taking the
+  collector and the web app with it.
+- **Why:** the OTLP collector caps bodies at 64 MB (`server/collector.ts:16-24`), but `server/api-explore.ts:119-129`
+  reads the whole JSON through `body()` (`server/util.ts:7-13`) with no limit before parsing it again.
+- **Fix:** apply the same 64 MB cap (413) to `/api/imports/file`, or stream large files from disk.
+
+### 15. Replays stay "running" forever after a restart (S-288)
+- **Do:** start a whole-run replay, restart neatroots before it finishes, then open the replay.
+- **Actual:** it shows "running" indefinitely; nothing marks it failed or interrupted.
+- **Why:** the `Replays` constructor (`replay/replay.ts:87-89`) only creates its table; there is no startup pass over
+  replays left in `running`, unlike the checks, which resume after a restart.
+- **Fix:** on startup, mark replays still `running` as `failed` with "interrupted by a restart".
 
 ## Gap
 - **Runs can be deleted only through the API (S-092).** `DELETE /api/runs/:traceId` exists
