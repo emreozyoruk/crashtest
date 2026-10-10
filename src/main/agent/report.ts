@@ -45,7 +45,9 @@ export function findingsMarkdown(projectName: string, scenarios: Scenario[]): st
         lines.push(`**What broke:** ${f.summary}`, '')
         lines.push(`- Expected: ${f.expected}`, `- Actual: ${f.actual}`)
         if (f.rootCause) lines.push(`- Root cause: ${f.rootCause}`)
-        if (f.screenshot) lines.push(`- Screenshot: \`${f.screenshot}\``)
+        // The runner sometimes reports an absolute path; keep the report portable.
+        if (f.screenshot)
+          lines.push(`- Screenshot: \`${f.screenshot.replace(/^.*?(\.crashtest\/)/, '$1')}\``)
         lines.push('')
         if (f.suggestedFix) lines.push('```diff', f.suggestedFix, '```', '')
       }
