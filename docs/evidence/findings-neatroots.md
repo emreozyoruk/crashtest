@@ -23,7 +23,7 @@ neatlogs' head of product engineering ([the ask](https://x.com/kurokotetsuyami/s
 
 ## Verified findings
 
-Bugs 1–5 come from the 78 core scenarios; bugs 6–11 from the run of the remaining scenarios, which is still going.
+Bugs 1–5 come from the 78 core scenarios; bugs 6–13 from the run of the remaining scenarios, which is still going.
 
 ### 1. A JSON OTLP body with a non-array `resourceSpans` is accepted and silently dropped (S-047)
 - **Do:** `POST /v1/traces` with `Content-Type: application/json` and `{"resourceSpans": "oops"}`.
@@ -138,6 +138,24 @@ Bugs 1–5 come from the 78 core scenarios; bugs 6–11 from the run of the rema
 - **Actual:** saved with `200` and no warning; it can never fire.
 - **Why:** `checks/types.ts:132-141` types `flag_on` as any non-empty string array, with no check against `options`.
 - **Fix:** a `superRefine` that every `flag_on` entry is a key of `options`.
+
+### 12. Turning steering off does not stop a running agent from being steered or halted (S-220)
+- **Do:** with steering on and a note pending for a running agent, turn steering off in the sidebar
+  (`POST /api/settings {steering_enabled:false}`), then let the agent make its next LLM call.
+- **Expected:** nothing is delivered once steering is off.
+- **Actual:** `POST /api/steer/claim` answers `mode: "off"` together with the pending note and marks it delivered;
+  the hook injects it, and a `halt` note still stops the agent.
+- **Why:** `steering/hub.ts:111-124` (`claim`) never checks `mode()`, and `server/api.ts:446` calls it whatever the
+  mode is. On the agent side, `packages/steer-ts/src/index.ts:228-230` uses `res.note` without looking at `res.mode`.
+- **Fix:** return no note when the mode is `off` (in `claim` or the route), and have the hooks ignore notes when
+  `mode === "off"`.
+
+### 13. Offline, `neatroots steering` stores an invalid mode (S-233)
+- **Do:** with the server stopped, `neatroots steering --project demo turbo`.
+- **Actual:** prints `steering for demo: turbo`, exits 0 and writes `steering: turbo` to `config.yaml`. With the
+  server up, the same command is rejected.
+- **Why:** `cli.ts:300-303` saves the mode directly when the server is down; only the server route validates it.
+- **Fix:** validate the mode in the CLI before either branch.
 
 ## Gap
 - **Runs can be deleted only through the API (S-092).** `DELETE /api/runs/:traceId` exists
