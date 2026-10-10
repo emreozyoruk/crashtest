@@ -88,7 +88,11 @@ async function recover(project: Project, runtime: Runtime, boot: BootResult): Pr
   postMessage(project.id, 'activity', 'The app stopped answering — restarting it')
   return trace({ name: 'app-recovery', kind: 'CHAIN', sessionId: project.id }, async () => {
     const procs = [...runtime.background()]
-    for (const p of procs) await runtime.startBackground(p.name, p.command)
+    // Stop first: after a dropped link the old process may still hold its port.
+    for (const p of procs) {
+      await runtime.stopBackground(p.name)
+      await runtime.startBackground(p.name, p.command)
+    }
     for (let i = 0; i < 20; i++) {
       if (await isUp(boot.baseUrl)) return true
       await new Promise((r) => setTimeout(r, 3_000))

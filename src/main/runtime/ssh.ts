@@ -22,6 +22,9 @@ function connect(target: SshTarget): Promise<Client> {
       port: target.port || 22,
       username: target.username,
       readyTimeout: 15_000,
+      // Notice a dead link within a minute instead of hanging on it.
+      keepaliveInterval: 15_000,
+      keepaliveCountMax: 4,
       ...(target.privateKey ? { privateKey: target.privateKey } : { password: target.password })
     }
     client
@@ -31,9 +34,13 @@ function connect(target: SshTarget): Promise<Client> {
   })
 }
 
+// Single-quote for the remote shell. Double quotes would let the login shell expand $!, $PWD
+// and $(...) before our bash ever runs, in the wrong directory.
+const sq = (s: string): string => `'${s.replaceAll("'", "'\\''")}'`
+
 function exec(client: Client, command: string, timeoutMs: number): Promise<ShellResult> {
   return new Promise((resolve) => {
-    client.exec(`bash -lc ${JSON.stringify(command)}`, (err, stream) => {
+    client.exec(`bash -lc ${sq(command)}`, (err, stream) => {
       if (err) return resolve({ code: -1, output: String(err.message) })
       let output = ''
       const timer = setTimeout(() => {
@@ -70,11 +77,38 @@ export async function createSshRuntime(
   appDir: string,
   env: Record<string, string>
 ): Promise<Runtime> {
-  const client = await connect(target)
+  // Wi-Fi changes and sleep drop the link mid-run. Background processes are setsid'd on the
+  // server and keep running, so reconnecting on the next call is all a run needs.
+  let client = await connect(target)
+  let closed = false
+  const track = (c: Client): void => {
+    c.on('close', () => (closed = true)).on('error', () => (closed = true))
+  }
+  track(client)
+  let reconnecting: Promise<Client> | undefined
+  const live = async (): Promise<Client> => {
+    if (!closed) return client
+    reconnecting ??= connect(target)
+      .then((c) => {
+        client = c
+        closed = false
+        track(c)
+        return c
+      })
+      .finally(() => (reconnecting = undefined))
+    return reconnecting
+  }
+  const sh = async (command: string, timeoutMs: number): Promise<ShellResult> => {
+    try {
+      return await exec(await live(), command, timeoutMs)
+    } catch (err) {
+      return { code: -1, output: `Lost the connection to the server: ${(err as Error).message}` }
+    }
+  }
   const procs: BackgroundProcess[] = []
   const tunnels: Server[] = []
   const exports = Object.entries({ ...env, CI: '1' })
-    .map(([k, v]) => `export ${k}=${JSON.stringify(v)}`)
+    .map(([k, v]) => `export ${k}=${sq(v)}`)
     .join('; ')
   const inDir = (cmd: string): string => `mkdir -p ${appDir} && cd ${appDir} && ${exports}; ${cmd}`
   const killCommand = (name: string): string =>
@@ -84,13 +118,12 @@ export async function createSshRuntime(
     kind: 'vds',
     label: `${target.username}@${target.host}`,
     appDir,
-    run: (command, timeoutMs = 180_000) => exec(client, inDir(command), timeoutMs),
+    run: (command, timeoutMs = 180_000) => sh(inDir(command), timeoutMs),
     async startBackground(name, command) {
       const logFile = `${appDir}/.crashtest/logs/${name}.log`
-      await exec(
-        client,
+      await sh(
         inDir(
-          `mkdir -p .crashtest/logs && (setsid nohup bash -lc ${JSON.stringify(command)} >> ${logFile} 2>&1 & echo $! > .crashtest/${name}.pid)`
+          `mkdir -p .crashtest/logs && (setsid nohup bash -lc ${sq(command)} >> ${logFile} 2>&1 & echo $! > .crashtest/${name}.pid)`
         ),
         20_000
       )
@@ -101,24 +134,24 @@ export async function createSshRuntime(
     async stopBackground(name) {
       const i = procs.findIndex((p) => p.name === name)
       if (i === -1) return false
-      await exec(client, killCommand(name), 10_000)
+      await sh(killCommand(name), 10_000)
       procs.splice(i, 1)
       return true
     },
     async readLog(name, lines = 80) {
-      return (await exec(client, `tail -n ${lines} ${appDir}/.crashtest/logs/${name}.log`, 15_000))
-        .output
+      return (await sh(`tail -n ${lines} ${appDir}/.crashtest/logs/${name}.log`, 15_000)).output
     },
     exposePort(port) {
       return new Promise((resolve, reject) => {
         const server = createServer((socket) => {
-          client.forwardOut('127.0.0.1', 0, '127.0.0.1', port, (err, stream) => {
-            if (err) {
-              socket.destroy()
-              return
-            }
-            socket.pipe(stream).pipe(socket)
-          })
+          live()
+            .then((c) =>
+              c.forwardOut('127.0.0.1', 0, '127.0.0.1', port, (err, stream) => {
+                if (err) socket.destroy()
+                else socket.pipe(stream).pipe(socket)
+              })
+            )
+            .catch(() => socket.destroy())
         })
         server.once('error', reject).listen(0, '127.0.0.1', () => {
           tunnels.push(server)
@@ -129,7 +162,7 @@ export async function createSshRuntime(
     background: () => procs,
     async dispose() {
       for (const p of procs) {
-        await exec(client, killCommand(p.name), 10_000)
+        await sh(killCommand(p.name), 10_000)
       }
       procs.length = 0
       for (const t of tunnels) t.close()
