@@ -77,6 +77,18 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - **An overstated verdict, caught and fixed.** "Expired links still redirect" ignored kutt's 30 s cleanup cron. New runner rule: find the job behind time-based behavior and report a delay as a delay. Re-run: the verdict now cites `server/cron.js` and the real window (up to 30 s; 15 min with the Redis cache).
 - Decided against shipping a `.dmg` this weekend: unsigned builds hit Gatekeeper, and the SDK and Playwright binaries would have to come out of the asar. README keeps "run from source".
 
+### 2026-10-10 (Sat) — 08:30–11:40 PDT — neatlogs asked us to run it on neatroots
+- neatlogs' head of product engineering replied to our day-1 post: *"run this on neatroots, & share your findings with me"*.
+- Crashtest mapped [neatroots](https://github.com/neatlogs/neatroots) into **581 scenarios across 12 journeys** in under 5 minutes, booted it on the EC2 server (pnpm install, two builds, ~3 min) and ran the **78 core P1 scenarios: ✅ 45 · ❌ 19 · ⏭ 14**. Every broken verdict was checked by hand: **5 real bugs and 1 gap**, each with repro, `file:line` and a suggested diff. [docs/evidence/findings-neatroots.md](docs/evidence/findings-neatroots.md)
+- **What the run taught Crashtest** (each one a commit, each re-verified):
+  - The Wi-Fi changed mid-run and the SSH link died. The SSH runtime now sends keepalives, reconnects on the next call, and retries the first connection on network errors (a bad key still fails at once). Tested by killing every SSH session on the server mid-run.
+  - Remote commands were double-quoted, so the login shell expanded `$!` and `$PWD` first: pid files were empty and teardown could not stop anything. Single-quoted now; a real run then left zero processes behind.
+  - The boot agent listed `pkill -f 'node index.js'` as cleanup, which teardown ran unchecked. Cleanup now passes the same shell guard.
+  - False positives, each turned into a runner rule: a proxy that rewrote `Host` made a working DNS-rebinding guard look broken (the runner now gets the boot notes and tests workarounds directly); a findings page and a `spanId` field the app never had were called bugs (absent features and API shapes are now "skipped"); the runner curled the Mac-side tunnel from the server shell (the prompt now says which side each tool is on). Re-run: S-051 passes and S-084 is skipped, as they should be.
+  - New: **setup notes from chat**. The user can tell the boot agent how to set the app up; we used it to start neatroots' mock LLM so Ask, Explain and Replay could be tested without keys.
+  - A product choice made before a restart did nothing (pending questions live in memory). It now resumes the analysis.
+- The EC2 instance was stopped from outside mid-run (API stop, not from inside the VM). Restarted it; new IP.
+
 ## Building in public
 - 2026-10-09 announcement: https://x.com/kurokotetsuyami/status/2108778646320390337
 - 2026-10-10 full Conduit run (294 scenarios, 104 broken in 34 files): https://x.com/kurokotetsuyami/status/2108943094809071674
