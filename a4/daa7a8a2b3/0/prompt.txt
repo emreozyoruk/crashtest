@@ -1,0 +1,7 @@
+<task-notification>
+<task-id>bjcepcwjp</task-id>
+<tool-use-id>toolu_017CspBcUeGFX8WzTqwVwrA2</tool-use-id>
+<output-file>/private/tmp/claude-502/-Users-emreozyoruk-Desktop-project-hackaton/56513bf4-5efb-4d2d-82ae-f739e0b24cc4/tasks/bjcepcwjp.output</output-file>
+<status>completed</status>
+<summary>Background command "Run all P2 and P3 scenarios on Conduit" completed (exit code 0)</summary>
+</task-notification>

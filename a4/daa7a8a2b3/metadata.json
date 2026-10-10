@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "a4daa7a8a2b3",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src/main/agent/runAgent.ts",
+    "src/main/agent/runtimeTools.ts",
+    "src/main/index.ts",
+    "src/main/runtime/local.ts",
+    "src/main/runtime/ssh.ts",
+    "src/main/runtime/types.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/a4/daa7a8a2b3/0/metadata.json",
+      "transcript": "/a4/daa7a8a2b3/0/full.jsonl",
+      "compact_transcript": "/a4/daa7a8a2b3/0/transcript.jsonl",
+      "content_hash": "/a4/daa7a8a2b3/0/content_hash.txt",
+      "prompt": "/a4/daa7a8a2b3/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 88,
+    "cache_creation_tokens": 55174,
+    "cache_read_tokens": 19636017,
+    "output_tokens": 23869,
+    "api_call_count": 44
+  }
+}
