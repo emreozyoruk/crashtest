@@ -1,0 +1,67 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "e8d3427ec9c1",
+  "session_id": "0980f640-3a33-4eb8-9f12-89accc563cc3",
+  "strategy": "manual-commit",
+  "created_at": "2026-10-10T08:22:49.413252Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "README.md",
+    "docs/cfoai/README.md",
+    "docs/evidence/cfoai-business-plan.png",
+    "hackathon.md"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5",
+  "turn_id": "3459b1fe5502",
+  "checkpoint_transcript_start": 787,
+  "transcript_lines_at_start": 787,
+  "compact_transcript_start": 137,
+  "token_usage": {
+    "input_tokens": 18,
+    "cache_creation_tokens": 7585,
+    "cache_read_tokens": 2942847,
+    "output_tokens": 5390,
+    "api_call_count": 9
+  },
+  "session_metrics": {
+    "turn_count": 6
+  },
+  "summary": {
+    "intent": "Finish hackathon project housekeeping: get ESLint clean, document cfo.ai evidence and README links, and prepare to run all P1 scenarios in the scenario sweep UI while an analysis job completed.",
+    "outcome": "ESLint reached 0 errors and 0 warnings. The cfo.ai evidence doc, README links and build log entry were written and committed. A P1 run script was prepared, but the transcript doesn't show it being executed.",
+    "learnings": {
+      "repo": [
+        "In ScenariosView, turning off the P2 and P3 filters makes the 'Start N shown' button run all P1 scenarios, so no select-all control is needed.",
+        "cfo.ai evidence lives in docs/cfoai/README.md and docs/evidence/cfoai-business-plan.png, and is linked from the main README.",
+        "hackathon.md serves as the build log and gets an entry for each milestone such as lint and cfo.ai."
+      ],
+      "code": [],
+      "workflow": [
+        "While a long analysis runs in the background, do small independent tasks such as docs and commits, and poll progress between them.",
+        "Before launching a sweep, check whether scenarios run sequentially or in parallel so you can estimate the duration."
+      ]
+    },
+    "friction": [
+      "The analysis ran long enough to need repeated polling with 'Check analysis progress'.",
+      "There was no obvious bulk-select control for scenarios, so the filter and run logic had to be read to find the workaround."
+    ],
+    "open_items": [
+      "Run the P1 scenario sweep with the prepared script and review the results.",
+      "Analysis was still finishing and its output hadn't been reviewed when the transcript ended."
+    ]
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-10-10T08:22:43.576135Z",
+    "agent_lines": 53,
+    "agent_removed": 2,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 53,
+    "total_lines_changed": 55,
+    "agent_percentage": 100,
+    "metric_version": 2
+  }
+}
