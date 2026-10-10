@@ -11,10 +11,17 @@ export function createLocalRuntime(appDir: string, env: Record<string, string>):
   mkdirSync(logDir, { recursive: true })
   const procs: (BackgroundProcess & { pid: number })[] = []
   const shellEnv = { ...process.env, ...env, CI: '1', BROWSER: 'none' }
+  // The app under test gets its own HOME, so installers and "connect" commands write their
+  // dotfiles there instead of the user's (~/.claude, ~/.cursor, shell profiles). It is set after
+  // the login shell has loaded the user's PATH, so node, pnpm and friends are still found.
+  const home = join(appDir, '.crashtest', 'home')
+  mkdirSync(home, { recursive: true })
+  const isolated = (command: string): string =>
+    `export HOME='${home.replaceAll("'", "'\\''")}'; ${command}`
 
   const run = (command: string, timeoutMs = 180_000): Promise<ShellResult> =>
     new Promise((resolve) => {
-      const child = spawn('/bin/zsh', ['-lc', command], { cwd: appDir, env: shellEnv })
+      const child = spawn('/bin/zsh', ['-lc', isolated(command)], { cwd: appDir, env: shellEnv })
       let output = ''
       const onData = (d: Buffer): void => {
         output += d.toString()
@@ -40,7 +47,7 @@ export function createLocalRuntime(appDir: string, env: Record<string, string>):
       const logFile = join(logDir, `${name}.log`)
       const fd = openSync(logFile, 'a')
       // detached gives the process its own group so dispose() can stop its children too.
-      const child = spawn('/bin/zsh', ['-lc', command], {
+      const child = spawn('/bin/zsh', ['-lc', isolated(command)], {
         cwd: appDir,
         env: shellEnv,
         detached: true,
