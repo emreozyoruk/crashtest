@@ -23,7 +23,7 @@ neatlogs' head of product engineering ([the ask](https://x.com/kurokotetsuyami/s
 
 ## Verified findings
 
-Bugs 1–5 come from the 78 core scenarios; bug 6 from the run of the remaining scenarios, which is still going.
+Bugs 1–5 come from the 78 core scenarios; bugs 6–7 from the run of the remaining scenarios, which is still going.
 
 ### 1. A JSON OTLP body with a non-array `resourceSpans` is accepted and silently dropped (S-047)
 - **Do:** `POST /v1/traces` with `Content-Type: application/json` and `{"resourceSpans": "oops"}`.
@@ -95,6 +95,16 @@ Bugs 1–5 come from the 78 core scenarios; bug 6 from the run of the remaining 
   from `config.yaml` are deep-merged with no range check (`config.ts`), and `store/db.ts:1151` turns 0 days into a
   cutoff of *now*. `core.ts:90-94` runs the sweep at startup and hourly.
 - **Fix:** apply the same 1–3650 check when the config is loaded, and skip the age sweep when `days < 1`.
+
+### 7. `neatroots init` with a bad `--steering` writes files, then fails (S-006, S-024)
+- **Do:** `neatroots init --steering gate` (no `--project`), or `neatroots init --project demo --steering turbo`.
+- **Expected:** refused before anything is written.
+- **Actual:** exits 1, but has already created `.neatroots/checks/` and `.neatroots/README.md`, rewritten `.env`
+  when `--write-env` is passed, and printed `✓ checks folder … (registered with neatroots)`, which is not true:
+  the config is never saved.
+- **Why:** `packages/neatroots/src/cli.ts:119-145` writes the folder, README and `.env` before the steering checks
+  at `cli.ts:146-155`.
+- **Fix:** validate `--steering` and `--project` at the top of the `init` action, before any write.
 
 ## Gap
 - **Runs can be deleted only through the API (S-092).** `DELETE /api/runs/:traceId` exists
