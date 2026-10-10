@@ -39,12 +39,31 @@ export function ask(
   return new Promise((resolve) => pending.set(projectId, { messageId: message.id, resolve }))
 }
 
+const PRODUCT_QUESTION = 'Which one should I map?'
+
 export function chooseAction(projectId: string, messageId: string, actionId: string): boolean {
-  const choice = pending.get(projectId)
-  if (!choice || choice.messageId !== messageId) return false
-  pending.delete(projectId)
   const project = getProject(projectId)
   const message = project?.messages.find((m) => m.id === messageId)
+  const choice = pending.get(projectId)
+  if (!choice || choice.messageId !== messageId) {
+    // Questions live in memory, so a restart leaves their buttons with nobody waiting.
+    // A product choice can be picked up again; anything else has to be started over.
+    if (!project || !message || isBusy(projectId)) return false
+    if (message.text.endsWith(PRODUCT_QUESTION) && !project.inventory) {
+      const label = message.actions?.find((a) => a.id === actionId)?.label
+      message.chosenActionId = actionId
+      publishProject(project)
+      void guard(project, (signal) => analyze(project, signal, label))
+      return true
+    }
+    postMessage(
+      projectId,
+      'agent',
+      'That question is from before Crashtest restarted. Start again.'
+    )
+    return false
+  }
+  pending.delete(projectId)
   if (project && message) {
     message.chosenActionId = actionId
     publishProject(project)
@@ -102,7 +121,7 @@ export function createProject(repoUrlText: string): Project | undefined {
   return project
 }
 
-async function pickProduct(project: Project): Promise<string[] | undefined> {
+async function pickProduct(project: Project, picked?: string): Promise<string[] | undefined> {
   const dirs = detectProducts(project.workdir)
   if (dirs.length < 2) return undefined
   postMessage(
@@ -121,21 +140,23 @@ async function pickProduct(project: Project): Promise<string[] | undefined> {
     { id: 'all', label: 'All of them' }
   ]
   const list = products.map((p) => `• **${p.name}** — ${p.description}`).join('\n')
-  const choice = await ask(
-    project.id,
-    `This repo holds ${products.length} products:\n${list}\n\nWhich one should I map?`,
-    actions
-  )
+  const choice =
+    actions.find((a) => a.label === picked)?.id ??
+    (await ask(
+      project.id,
+      `This repo holds ${products.length} products:\n${list}\n\n${PRODUCT_QUESTION}`,
+      actions
+    ))
   if (choice === 'all') return products.flatMap((p) => p.paths)
   const chosen = products[Number(choice)]
   update(project, { productPath: chosen.name })
   return chosen.paths
 }
 
-async function analyze(project: Project, signal: AbortSignal): Promise<void> {
+async function analyze(project: Project, signal: AbortSignal, picked?: string): Promise<void> {
   postMessage(project.id, 'agent', `Cloning ${project.repoUrl}…`)
   await cloneRepo(parseGithubUrl(project.repoUrl)!)
-  const productPaths = await pickProduct(project)
+  const productPaths = await pickProduct(project, picked)
 
   update(project, { phase: 'inventory' })
   postMessage(
