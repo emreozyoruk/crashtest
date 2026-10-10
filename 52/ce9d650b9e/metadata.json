@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "52ce9d650b9e",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 5,
+  "files_touched": [
+    "src/main/agent/orchestrator.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/52/ce9d650b9e/0/metadata.json",
+      "transcript": "/52/ce9d650b9e/0/full.jsonl",
+      "compact_transcript": "/52/ce9d650b9e/0/transcript.jsonl",
+      "content_hash": "/52/ce9d650b9e/0/content_hash.txt",
+      "prompt": "/52/ce9d650b9e/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 104,
+    "cache_creation_tokens": 143163,
+    "cache_read_tokens": 5786271,
+    "output_tokens": 19780,
+    "api_call_count": 50
+  }
+}

@@ -1,0 +1,39 @@
+<task-notification>
+<task-id>bwz13j7i0</task-id>
+<tool-use-id>toolu_01VYv3YcYh5fkuzGi2gL5sXy</tool-use-id>
+<output-file>/private/tmp/claude-502/-Users-emreozyoruk-Desktop-project-hackaton/56513bf4-5efb-4d2d-82ae-f739e0b24cc4/tasks/bwz13j7i0.output</output-file>
+<status>completed</status>
+<summary>Background command "Run one scenario end to end and check for leftover processes" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+AMA ne reis ne ürettin tek tek hele bi anlat
+
+---
+
+[Image #30] bizim twite bu gelmiş bunu atmıslar  adamda bu [Image #31]
+
+---
+
+<task-notification>
+<task-id>bmsj22snj</task-id>
+<tool-use-id>toolu_013N1BWxcgfcSibhiPHwFgFR</tool-use-id>
+<output-file>/private/tmp/claude-502/-Users-emreozyoruk-Desktop-project-hackaton/56513bf4-5efb-4d2d-82ae-f739e0b24cc4/tasks/bmsj22snj.output</output-file>
+<status>completed</status>
+<summary>Background command "Analyze neatroots repo with Crashtest" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+niye durdun
+
+---
+
+<task-notification>
+<task-id>bx4n8maw1</task-id>
+<tool-use-id>toolu_01EK7iguv3ZnZLsUbpCa1kRy</tool-use-id>
+<output-file>/private/tmp/claude-502/-Users-emreozyoruk-Desktop-project-hackaton/56513bf4-5efb-4d2d-82ae-f739e0b24cc4/tasks/bx4n8maw1.output</output-file>
+<status>failed</status>
+<summary>Background command "Pick neatroots product and wait for scenarios" failed with exit code 144</summary>
+</task-notification>
