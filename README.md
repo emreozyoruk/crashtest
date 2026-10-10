@@ -1,13 +1,63 @@
 # Crashtest
 
-Find the bugs your users would hit, before they hit them.
+**Find the bugs your users would hit, before they hit them.**
 
-Crashtest is a macOS app with an autonomous agent. Give it a GitHub repo and it:
+Most bugs that reach users are not in code nobody tested. They are in paths nobody walked: rejecting instead of approving, the empty account, the second tab, someone else's id in the URL. Crashtest is a macOS app with an autonomous agent that walks those paths for you.
 
-1. **Maps** what the app can do, read straight from the code (screens, actions, APIs, jobs, integrations, roles, limits).
-2. **Writes every scenario** a user can do or live through, prioritized P1–P3.
-3. **Runs them for real** — clones the app, boots it locally or on your own server (VDS), drives it in a browser, and reports what breaks with screenshots, logs, root cause and a suggested fix.
+Give it a GitHub repo and it:
 
-Built for [neatHack](https://neatlogs.com/hackathon) (Oct 10–12, 2026) with [neatlogs](https://neatlogs.com), [Entire](https://entire.io) and [cfo.ai](https://cfo.ai).
+1. **Maps the app from its code** — screens, actions, API operations, background jobs, integrations, roles, entity lifecycles, limits.
+2. **Writes every scenario a user can do or live through**, ranked P1–P3 and grouped by user journey.
+3. **Runs them for real** — clones the app, boots it on your Mac or on your own server (VDS), drives it in a browser, and reports what broke with a screenshot, the root cause at `file:line`, and a suggested diff. It never edits your code.
 
-> Work in progress — see [hackathon.md](hackathon.md) for the build log.
+Built during [neatHack](https://neatlogs.com/hackathon) (Oct 10–12, 2026). Build log: [hackathon.md](hackathon.md).
+
+## What it found on its first real target
+
+On [TonyMckes/conduit-realworld-example-app](https://github.com/TonyMckes/conduit-realworld-example-app), a well-known RealWorld implementation, Crashtest wrote 245 scenarios, booted the app from scratch (local Postgres, generated `.env`, API + frontend) and found, among others:
+
+- **A comment can be deleted through any article's URL** — `backend/controllers/comments.js` ignores the slug.
+- **Users can follow themselves** — `backend/controllers/profiles.js` never compares ids.
+- `DEV_DB_LOGGING="false"` crashes the app at boot, because the string `"false"` is truthy.
+
+Details, diffs and screenshots: [docs/evidence/findings-conduit.md](docs/evidence/findings-conduit.md).
+
+## How it works
+
+```
+GitHub link ─► Intake ─► Inventory agent ─► Scenario writer ─► [Start] ─► Local │ VDS
+               clone,     Sonnet 5.5,        Haiku 5.5,                     │
+               products   read-only tools    parallel per journey           ▼
+                                                              Bootstrap agent ─► Sweep agent
+                                                              boots the app      one scenario at a time,
+                                                              (shell, logs,      Playwright browser + API,
+                                                              ports, recovery)   verdict + root cause + diff
+```
+
+- **Agents** run on the [Claude Agent SDK](https://docs.claude.com/en/api/agent-sdk/overview) with a per-phase tool set: the inventory agent can only read; the bootstrap and sweep agents operate the app through Crashtest's own MCP tools (`shell`, `start_background`, `read_log`, `expose_port`, `http_get`).
+- **Local and VDS are the same to the agent.** Both runtimes implement those tools; the VDS runtime works over SSH and tunnels the app's ports back so the browser on your Mac can drive it.
+- **Recovery.** If the app stops answering mid-run, Crashtest restarts it with the commands the bootstrap agent used and carries on. Services run in the foreground and are always stopped at the end, even if you quit mid-run.
+- **Chat.** Ask about the app, hand over `.env` values or server details (stored encrypted in the macOS Keychain), or start a run from the conversation.
+
+## Built with the neatHack tools
+
+| Tool | How Crashtest uses it |
+|---|---|
+| [neatlogs](https://neatlogs.com) | Every phase is its own traced workflow (`repo-inventory`, `scenario-generation`, `app-bootstrap`, `scenario-sweep`, `app-recovery`, `project-chat`), grouped per project. Two custom detections — **Bug found by Crashtest** and **Unverified verdict** — and before/after traces drove real fixes. Our own build sessions are traced too. [Evidence](docs/evidence/neatlogs-baselines.md) |
+| [Entire](https://entire.io) | Checkpoints on our commits, plus **Entire Graph inside the product**: the inventory and sweep agents get graph search / definitions / callers / blast-radius tools over the repo under test. |
+| [cfo.ai](https://cfo.ai) | Business plan for Crashtest: pricing, unit costs taken from neatlogs traces, revenue scenarios and runway. |
+
+## Run it
+
+Requirements: macOS, Node 22+, git. Optional: the [Entire CLI](https://entire.io) for graph tools.
+
+```bash
+npm install
+npm run dev
+```
+
+Open **Settings**, add your Anthropic API key (and a GitHub token for private repos, or SSH details for a VDS), then paste a GitHub link into the chat.
+
+## License
+
+MIT
