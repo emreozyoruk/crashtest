@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "c4be1680df16",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "README.md",
+    "docs/demo-video.md",
+    "docs/evidence/findings-conduit-all.md",
+    "docs/evidence/findings-conduit.md",
+    "hackathon.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/c4/be1680df16/0/metadata.json",
+      "transcript": "/c4/be1680df16/0/full.jsonl",
+      "compact_transcript": "/c4/be1680df16/0/transcript.jsonl",
+      "content_hash": "/c4/be1680df16/0/content_hash.txt",
+      "prompt": "/c4/be1680df16/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 26,
+    "cache_creation_tokens": 15185,
+    "cache_read_tokens": 6237024,
+    "output_tokens": 8597,
+    "api_call_count": 13
+  }
+}
