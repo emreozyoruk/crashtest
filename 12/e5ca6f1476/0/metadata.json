@@ -1,0 +1,81 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "12e5ca6f1476",
+  "session_id": "0980f640-3a33-4eb8-9f12-89accc563cc3",
+  "strategy": "manual-commit",
+  "created_at": "2026-10-10T15:30:15.830269Z",
+  "branch": "main",
+  "checkpoints_count": 5,
+  "files_touched": [
+    "hackathon.md"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5[1m]",
+  "turn_id": "ea0c04d82ae6",
+  "checkpoint_transcript_start": 1840,
+  "transcript_lines_at_start": 1840,
+  "compact_transcript_start": 308,
+  "token_usage": {
+    "input_tokens": 38,
+    "cache_creation_tokens": 47682,
+    "cache_read_tokens": 1125539,
+    "output_tokens": 9926,
+    "api_call_count": 19
+  },
+  "session_metrics": {
+    "turn_count": 11
+  },
+  "summary": {
+    "intent": "Continue the autonomous 'Crashtest' neatHack project, then walk Emre through everything left to do (demo video, X posts, cfo.ai cancellation, submission) and prepare assets for the first X post.",
+    "outcome": "Delivered the Turkish overnight summary, prepared the app with copied demo data for video recording, added GitHub topics and the Entire homepage link, put a fresh full-run Conduit screenshot (180/104/10) on Desktop, and logged Emre's first X post in hackathon.md, then committed and pushed it.",
+    "learnings": {
+      "repo": [
+        "Demo app data lives in a copied folder ($HOME/crashtest-demo/conduit); launch with `npx electron . --user-data-dir=$HOME/crashtest-demo/conduit`.",
+        "docs/evidence/conduit-p1-scenarios.png is from the first P1 run only (80 pass / 33 fail) and does not match the full-run numbers, so a fresh screenshot is needed for posts.",
+        "hackathon.md is the build log where public posts such as X links get recorded.",
+        "Entire checkpoints must be scanned with scan.sh before every push of entire/checkpoints/v1; push_sessions stays false."
+      ],
+      "code": [],
+      "workflow": [
+        "Say a screenshot or evidence file is stale rather than reusing it when its numbers differ from the public claim.",
+        "When the user asks for step-by-step instructions, give a numbered list with exact commands and what to send back.",
+        "Do small safe repo-metadata tasks yourself (GitHub topics, homepage) rather than assigning them to the user."
+      ]
+    },
+    "friction": [
+      "The user kept asking for fuller step-by-step lists, and the first answers were not exhaustive enough.",
+      "The existing repo screenshot was out of date versus the full-run numbers.",
+      "The user's tasks depend on external items that cannot be verified from here: Discord announcements, email, the Luma team name, and X handles."
+    ],
+    "open_items": [
+      "Emre must record the demo video using docs/demo-video.md.",
+      "Emre must cancel the cfo.ai subscription and send a screenshot as proof.",
+      "Emre must check Discord, email and the Luma team name, and send the X handles and the official neatlogs post link.",
+      "Submit Monday Oct 12, 06:30–11:25 PDT, as a quote of the official neatlogs post with the video attached.",
+      "Claude must terminate EC2 i-003099425322583e2 after submission.",
+      "Run the remaining kutt P2/P3 scenarios and re-run the 21 'Unverified verdict' scenarios.",
+      "Post the remaining X drafts (Posts 3–5) at intervals."
+    ]
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-10-10T15:30:07.407256Z",
+    "agent_lines": 3,
+    "agent_removed": 2,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 3,
+    "total_lines_changed": 5,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    }
+  ]
+}
