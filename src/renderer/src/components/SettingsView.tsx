@@ -177,6 +177,27 @@ export default function SettingsView(): React.JSX.Element {
         </section>
 
         <section>
+          <h3>Scenarios at once</h3>
+          <p className="hint">
+            Run several scenarios side by side against the same app. Faster, but they all share the
+            same app data.
+          </p>
+          <div className="segmented" role="radiogroup" aria-label="Scenarios at once">
+            {[1, 2, 3, 4].map((n) => (
+              <button
+                key={n}
+                className={settings.parallelRuns === n ? 'on' : ''}
+                role="radio"
+                aria-checked={settings.parallelRuns === n}
+                onClick={() => update({ ...settings, parallelRuns: n })}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section>
           <h3>Your server (VDS)</h3>
           <p className="hint">
             Crashtest connects over SSH, copies the repo there, starts the app and tunnels it back

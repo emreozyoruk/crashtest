@@ -96,6 +96,7 @@ export async function runScenario(opts: {
   apiUrl: string
   inventory?: Inventory
   bootNotes?: string
+  parallel?: number
   signal?: AbortSignal
 }): Promise<SweepVerdict> {
   const s = opts.scenario
@@ -113,6 +114,12 @@ export async function runScenario(opts: {
           `on ${opts.runtime.label}, where the app listens on its own ports and that URL does not exist.\n`
         : '') +
       (opts.bootNotes ? `Boot notes: ${opts.bootNotes}\n` : '') +
+      (opts.parallel && opts.parallel > 1
+        ? `${opts.parallel - 1} other scenarios run against this same app at the same time. Never stop or restart ` +
+          'the shared app or its database, and expect data you did not create. If the scenario needs a fresh or ' +
+          'differently started instance, start your own copy on other ports with its own data directory, and stop it ' +
+          'when you are done.\n'
+        : '') +
       '\n' +
       `Scenario ${s.id} [${s.priority}] — ${s.title}\nWho: ${s.who}\nStarting state: ${s.startingState}\n` +
       `Steps:\n${s.steps.map((x, i) => `${i + 1}. ${x}`).join('\n')}\nExpected: ${s.expected}\n\n` +

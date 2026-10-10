@@ -181,62 +181,81 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
     project.phase = 'sweeping'
     publishProject(project)
 
-    for (const scenario of selected) {
-      if (signal.aborted) break
-      if (!scenario.runnable) {
-        setStatus(project, scenario, {
-          status: 'skipped',
-          notes: 'Needs something a local test run cannot simulate.'
-        })
-        continue
-      }
-      if (!(await isUp(boot.baseUrl)) && !(await recover(project, runtime, boot))) {
-        postMessage(
-          project.id,
-          'agent',
-          'The app went down and did not come back after a restart. Stopping the run.'
-        )
-        break
-      }
-      setStatus(project, scenario, { status: 'running' })
-      postMessage(project.id, 'activity', `${scenario.id} · ${scenario.title}`)
-      try {
-        const verdict = await trace(
-          {
-            name: 'scenario-sweep',
-            kind: 'WORKFLOW',
-            sessionId: project.id,
-            input: { id: scenario.id, title: scenario.title }
-          },
-          () =>
-            runScenario({
-              projectId: project.id,
-              scenario,
-              runtime,
-              localWorkdir: project.workdir,
-              baseUrl: boot.baseUrl,
-              apiUrl: boot.apiUrl,
-              inventory: project.inventory,
-              bootNotes: boot.notes,
-              signal
-            })
-        )
-        setStatus(project, scenario, {
-          status: verdict.status,
-          notes: verdict.observed,
-          finding: verdict.finding
-        })
-        if (verdict.status === 'broken' && verdict.finding) {
-          postMessage(project.id, 'agent', `❌ **${scenario.id}** ${verdict.finding.summary}`)
+    // Workers share one queue. Health checks and restarts go through one promise, so two
+    // workers never restart the app at the same time.
+    const queue = [...selected]
+    let stopped = false
+    let healing: Promise<boolean> | undefined
+    const healthy = async (): Promise<boolean> => {
+      if (healing) return healing
+      if (await isUp(boot.baseUrl)) return true
+      healing ??= recover(project, runtime, boot).finally(() => (healing = undefined))
+      return healing
+    }
+    const parallel = Math.max(1, Math.min(6, getSettings().parallelRuns))
+
+    const worker = async (): Promise<void> => {
+      for (let scenario = queue.shift(); scenario; scenario = queue.shift()) {
+        if (signal.aborted || stopped) return
+        if (!scenario.runnable) {
+          setStatus(project, scenario, {
+            status: 'skipped',
+            notes: 'Needs something a local test run cannot simulate.'
+          })
+          continue
         }
-      } catch (err) {
-        if (signal.aborted) throw err
-        setStatus(project, scenario, {
-          status: 'not_run',
-          notes: `Runner error: ${(err as Error).message}`
-        })
+        if (!(await healthy())) {
+          if (!stopped)
+            postMessage(
+              project.id,
+              'agent',
+              'The app went down and did not come back after a restart. Stopping the run.'
+            )
+          stopped = true
+          return
+        }
+        setStatus(project, scenario, { status: 'running' })
+        postMessage(project.id, 'activity', `${scenario.id} · ${scenario.title}`)
+        try {
+          const verdict = await trace(
+            {
+              name: 'scenario-sweep',
+              kind: 'WORKFLOW',
+              sessionId: project.id,
+              input: { id: scenario.id, title: scenario.title }
+            },
+            () =>
+              runScenario({
+                projectId: project.id,
+                scenario,
+                runtime,
+                localWorkdir: project.workdir,
+                baseUrl: boot.baseUrl,
+                apiUrl: boot.apiUrl,
+                inventory: project.inventory,
+                bootNotes: boot.notes,
+                parallel,
+                signal
+              })
+          )
+          setStatus(project, scenario, {
+            status: verdict.status,
+            notes: verdict.observed,
+            finding: verdict.finding
+          })
+          if (verdict.status === 'broken' && verdict.finding) {
+            postMessage(project.id, 'agent', `❌ **${scenario.id}** ${verdict.finding.summary}`)
+          }
+        } catch (err) {
+          if (signal.aborted) throw err
+          setStatus(project, scenario, {
+            status: 'not_run',
+            notes: `Runner error: ${(err as Error).message}`
+          })
+        }
       }
     }
+    await Promise.all(Array.from({ length: parallel }, worker))
 
     const count = (st: Scenario['status']): number => selected.filter((s) => s.status === st).length
     const broken = selected.filter((s) => s.status === 'broken')

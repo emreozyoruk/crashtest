@@ -106,6 +106,8 @@ export interface Settings {
   defaultRunTarget: RunTarget | 'ask'
   // Model that runs each scenario: Sonnet judges more carefully, Haiku costs about a third.
   runnerModel: 'sonnet' | 'haiku'
+  // How many scenarios run at once against the same app.
+  parallelRuns: number
   ssh: { host: string; port: number; username: string }
 }
 
