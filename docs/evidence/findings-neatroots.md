@@ -16,12 +16,14 @@ neatlogs' head of product engineering ([the ask](https://x.com/kurokotetsuyami/s
   checks, ask/explain/replay, and import. First pass: 45 passed · 19 broken · 14 skipped.
 - Most skips needed an LLM. A second pass of 16 scenarios started neatroots' own mock LLM (given to Crashtest
   as a setup note in chat) and ran on the fixed runner below: 11 passed · 0 broken · 5 skipped.
-  **Final: 56 passed · 16 broken · 6 skipped.** Of the 16 broken, 7 are the five bugs below, 1 is the gap, and
+  **Final: 56 passed · 16 broken · 6 skipped.** Of the 16 broken, 7 are bugs 1–5 below, 1 is the gap, and
   8 are expectations the scenario writer assumed (listed at the end).
 - Every "broken" verdict below was then checked by hand against the source, and reproduced where it could
   be. Verdicts that did not hold up are listed at the end, with what we changed in Crashtest because of them.
 
 ## Verified findings
+
+Bugs 1–5 come from the 78 core scenarios; bug 6 from the run of the remaining scenarios, which is still going.
 
 ### 1. A JSON OTLP body with a non-array `resourceSpans` is accepted and silently dropped (S-047)
 - **Do:** `POST /v1/traces` with `Content-Type: application/json` and `{"resourceSpans": "oops"}`.
@@ -84,6 +86,15 @@ neatlogs' head of product engineering ([the ask](https://x.com/kurokotetsuyami/s
   (`api-models.ts:119` already distinguishes `LlmUnavailableError`.)
 - **Fix:** map `LlmUnavailableError` to a message that names the cause and the fix, e.g.
   "No LLM is reachable. Set one up in Settings → Models or run `neatroots llm use <provider>`."
+
+### 6. `retention.days: 0` in `config.yaml` deletes every unpinned run on start (S-014)
+- **Do:** set `retention: { days: 0 }` in `config.yaml` and run `neatroots start`.
+- **Expected:** 0 is refused (or treated as "keep forever"), as the settings API already does.
+- **Actual:** the startup sweep deleted all 8 unpinned runs, including ones from hours ago, and repeats every hour.
+- **Why:** `PATCH /api/settings` only accepts `retention_days` between 1 and 3650 (`server/api.ts:281`), but values
+  from `config.yaml` are deep-merged with no range check (`config.ts`), and `store/db.ts:1151` turns 0 days into a
+  cutoff of *now*. `core.ts:90-94` runs the sweep at startup and hourly.
+- **Fix:** apply the same 1–3650 check when the config is loaded, and skip the age sweep when `days < 1`.
 
 ## Gap
 - **Runs can be deleted only through the API (S-092).** `DELETE /api/runs/:traceId` exists
