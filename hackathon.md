@@ -80,6 +80,7 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 ## Building in public
 - 2026-10-09 announcement: https://x.com/kurokotetsuyami/status/2108778646320390337
 - 2026-10-10 full Conduit run (294 scenarios, 104 broken in 34 files): https://x.com/kurokotetsuyami/status/2108943094809071674
+- 2026-10-10 neatlogs caught our agent running `pkill` (and hiding it in its cleanup list); both closed: https://x.com/kurokotetsuyami/status/2108967648575066113
 
 ## Demo
 Pending.
