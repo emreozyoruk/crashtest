@@ -216,6 +216,7 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
               baseUrl: boot.baseUrl,
               apiUrl: boot.apiUrl,
               inventory: project.inventory,
+              bootNotes: boot.notes,
               signal
             })
         )

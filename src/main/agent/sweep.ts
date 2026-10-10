@@ -33,6 +33,9 @@ Rules:
 - Before calling time-based behavior broken (expiry, cooldowns, cleanup, retries), look for the job that enforces
   it — cron, setInterval, queue workers — and wait out its interval or re-check. Report a delay as a delay, with
   how long it lasts, not as a missing feature.
+- The boot notes say how the app was started. If a proxy or other workaround sits between you and the app
+  (rewriting headers, origin, auth), test whatever it changes directly against the app with the shell, and
+  never report the workaround's effect as the app's bug.
 - If broken: find the cause in the source code (cite file:line) — the graph tools find handlers, callers and
   blast radius fastest — and write a minimal suggested fix as a unified diff.
   Do not edit any files.
@@ -86,6 +89,7 @@ export async function runScenario(opts: {
   baseUrl: string
   apiUrl: string
   inventory?: Inventory
+  bootNotes?: string
   signal?: AbortSignal
 }): Promise<SweepVerdict> {
   const s = opts.scenario
@@ -97,7 +101,9 @@ export async function runScenario(opts: {
     systemPrompt: SYSTEM,
     prompt:
       `App: ${opts.inventory?.productName ?? ''} — ${opts.inventory?.summary ?? ''}\n` +
-      `Open the app at ${opts.baseUrl}${opts.apiUrl && opts.apiUrl !== opts.baseUrl ? ` (API at ${opts.apiUrl})` : ''}.\n\n` +
+      `Open the app at ${opts.baseUrl}${opts.apiUrl && opts.apiUrl !== opts.baseUrl ? ` (API at ${opts.apiUrl})` : ''}.\n` +
+      (opts.bootNotes ? `Boot notes: ${opts.bootNotes}\n` : '') +
+      '\n' +
       `Scenario ${s.id} [${s.priority}] — ${s.title}\nWho: ${s.who}\nStarting state: ${s.startingState}\n` +
       `Steps:\n${s.steps.map((x, i) => `${i + 1}. ${x}`).join('\n')}\nExpected: ${s.expected}\n\n` +
       `Save screenshots into ${outputDir}. Run it now and report the verdict.`,
