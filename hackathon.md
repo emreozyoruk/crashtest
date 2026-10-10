@@ -93,6 +93,8 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - 2026-10-09 announcement: https://x.com/kurokotetsuyami/status/2108778646320390337
 - 2026-10-10 full Conduit run (294 scenarios, 104 broken in 34 files): https://x.com/kurokotetsuyami/status/2108943094809071674
 - 2026-10-10 neatlogs caught our agent running `pkill` (and hiding it in its cleanup list); both closed: https://x.com/kurokotetsuyami/status/2108967648575066113
+- 2026-10-10 live page of Crashtest testing neatroots: http://34.238.91.131:8080
+- 2026-10-10 cfo.ai business plan, unit costs from neatlogs traces: https://x.com/kurokotetsuyami/status/2109037159063953484
 
 ## Demo
 Pending.
