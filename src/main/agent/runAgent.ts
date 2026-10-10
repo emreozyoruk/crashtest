@@ -46,6 +46,9 @@ export function anthropicKey(): string {
   return key
 }
 
+// SDK-internal tools that mean nothing to the user.
+const HIDDEN_TOOLS = new Set(['ToolSearch', 'StructuredOutput', 'TodoWrite'])
+
 function describeTool(name: string, input: Record<string, unknown>, cwd: string): string {
   const path = (input.file_path ?? input.path ?? input.pattern) as string | undefined
   const shown = path && path.startsWith('/') ? relative(cwd, path) || '.' : path
@@ -58,8 +61,24 @@ function describeTool(name: string, input: Record<string, unknown>, cwd: string)
       return `Listing ${shown}`
     case 'Bash':
       return `Running \`${String(input.command).slice(0, 120)}\``
+    case 'mcp__app__shell':
+      return `Running \`${String(input.command).slice(0, 120)}\``
+    case 'mcp__app__start_background':
+      return `Starting ${input.name}: \`${String(input.command).slice(0, 100)}\``
+    case 'mcp__app__read_log':
+      return `Reading the ${input.name} log`
+    case 'mcp__app__expose_port':
+      return `Opening port ${input.port}`
+    case 'mcp__app__http_get':
+      return `Checking ${input.url}`
+    case 'mcp__graph__search':
+      return `Graph search: "${input.query}"`
+    case 'mcp__graph__definition':
+    case 'mcp__graph__neighbors':
+    case 'mcp__graph__impact':
+      return `Graph ${name.replace('mcp__graph__', '')}: ${input.symbol}`
     default:
-      return name.startsWith('mcp__playwright__') ? `Browser: ${name.replace('mcp__playwright__browser_', '')}` : name
+      return name.startsWith('mcp__playwright__') ? `Browser: ${name.replace('mcp__playwright__browser_', '').replace(/_/g, ' ')}` : name
   }
 }
 
@@ -90,7 +109,7 @@ export async function runAgent<T = string>(opts: AgentRunOptions): Promise<Agent
   for await (const message of stream) {
     if (message.type === 'assistant') {
       for (const block of message.message.content) {
-        if (block.type === 'tool_use') {
+        if (block.type === 'tool_use' && !HIDDEN_TOOLS.has(block.name)) {
           postMessage(opts.projectId, 'activity', describeTool(block.name, block.input as Record<string, unknown>, opts.cwd))
         }
       }

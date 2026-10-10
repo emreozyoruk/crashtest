@@ -27,6 +27,10 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - UI: chat with live tool activity and choice buttons, scenarios grouped by journey with P1–P3 filters, finding panel with root cause + diff, settings with Keychain-backed secrets and a VDS connection test.
 - Incident: an Entire checkpoint of this session captured AWS credentials pasted earlier in the chat. Caught locally before any push; rolled back, disabled automatic checkpoint pushes and added custom redaction rules. Checkpoints are now scanned before every push.
 
+### 2026-10-10 (Sat) — 00:25 PDT — first end-to-end analysis
+- Ran the built app (driven by Playwright's Electron runner) on `TonyMckes/conduit-realworld-example-app`: clone → product grouping (frontend + backend correctly treated as one product, no question asked) → inventory (38 surfaces, 5 journeys) → **188 scenarios** (78 P1 · 79 P2 · 31 P3, 5 not runnable locally) in 103 s total.
+- neatlogs showed the inventory agent trying `Bash(cat package.json)` and getting denied (1 errored span, $0.46). Fix: the prompt now states the agent only has read tools, and the agent gets Entire Graph tools. Baseline kept in [docs/evidence/neatlogs-baselines.md](docs/evidence/neatlogs-baselines.md) for the before/after comparison.
+
 ## Building in public
 - 2026-10-09 announcement: https://x.com/kurokotetsuyami/status/2108778646320390337
 

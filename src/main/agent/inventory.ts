@@ -19,6 +19,8 @@ Collect every surface that exists, using these places to look:
 - ai: agents, prompts, tools, approval gates
 
 Rules:
+- You can only read: Read, Grep, Glob (and the graph tools when present). There is no shell — do not try to run
+  commands; read package.json and config files with Read instead.
 - Be exhaustive. Prefer many precise surfaces over a few vague ones. Do not skip a corner because it is small.
 - Every surface must point at the file that defines it ("location": "path/to/file.ts" or "file.ts:42").
 - Group surfaces into user journeys, named the way a user would describe them ("Sign up and sign in",
