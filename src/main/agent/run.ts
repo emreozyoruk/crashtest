@@ -8,7 +8,7 @@ import { postMessage, publishProject } from '../events'
 import type { Runtime } from '../runtime/types'
 import { createLocalRuntime } from '../runtime/local'
 import { createSshRuntime, testSsh, type SshTarget } from '../runtime/ssh'
-import { reapStale } from '../runtime/reap'
+import { reapScenario, reapStale } from '../runtime/reap'
 import { ask, guard, isBusy } from './orchestrator'
 import { bootApp, type BootResult } from './bootstrap'
 import { runScenario } from './sweep'
@@ -284,6 +284,13 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
         } finally {
           clearTimeout(timer)
           signal.removeEventListener('abort', stopRun)
+          const left = await reapScenario(runtime, scenario.id).catch(() => 0)
+          if (left)
+            postMessage(
+              project.id,
+              'activity',
+              `${scenario.id} left ${left} processes running; stopped them`
+            )
         }
       }
     }

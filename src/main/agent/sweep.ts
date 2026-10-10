@@ -135,7 +135,7 @@ export async function runScenario(opts: {
     ],
     mcpServers: {
       ...playwrightServer(outputDir),
-      ...(await appToolsServer(opts.runtime)),
+      ...(await appToolsServer(opts.runtime, s.id)),
       ...graph
     },
     schema: SCHEMA,

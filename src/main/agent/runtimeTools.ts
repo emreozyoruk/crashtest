@@ -27,6 +27,8 @@ export function unsafeCommand(command: string): string | null {
     : null
 }
 
+export const SCENARIO_ENV = 'CRASHTEST_SCENARIO'
+
 // Our tools are few and central to each phase, so load them up front instead of behind tool search.
 const LOAD = { alwaysLoad: true }
 
@@ -34,8 +36,14 @@ const text = (t: string): { content: { type: 'text'; text: string }[] } => ({
   content: [{ type: 'text', text: t }]
 })
 
-export async function appToolsServer(runtime: Runtime): Promise<Record<string, unknown>> {
+export async function appToolsServer(
+  runtime: Runtime,
+  scenarioId?: string
+): Promise<Record<string, unknown>> {
   const { createSdkMcpServer, tool } = await loadSdk()
+  // Everything a scenario starts inherits its tag, so what it forgets to stop can be found later.
+  const tagged = (cmd: string): string =>
+    scenarioId ? `export ${SCENARIO_ENV}=${scenarioId}; ${cmd}` : cmd
   const def: typeof tool = (name, description, schema, handler) =>
     tool(name, description, schema, handler, LOAD)
   return {
@@ -50,7 +58,7 @@ export async function appToolsServer(runtime: Runtime): Promise<Record<string, u
           async ({ command }) => {
             const refused = unsafeCommand(command)
             if (refused) return text(refused)
-            const res = await runtime.run(command)
+            const res = await runtime.run(tagged(command))
             return text(`exit ${res.code}\n${res.output}`)
           }
         ),
@@ -61,7 +69,7 @@ export async function appToolsServer(runtime: Runtime): Promise<Record<string, u
           async ({ name, command }) => {
             const refused = unsafeCommand(command)
             if (refused) return text(refused)
-            const proc = await runtime.startBackground(name, command)
+            const proc = await runtime.startBackground(name, tagged(command))
             return text(`started ${proc.name}; log: ${proc.logFile}`)
           }
         ),

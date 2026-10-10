@@ -19,3 +19,19 @@ export async function reapStale(runtime: Runtime): Promise<number> {
   const res = await runtime.run(SCRIPT, 30_000)
   return Number(res.output.trim().split('\n').pop()) || 0
 }
+
+// Stops what one scenario started and left running (a second app copy, a proxy, a model server).
+// Every command a scenario runs carries its tag in the environment; only Linux exposes another
+// process's environment reliably (/proc), so on this Mac it does nothing.
+const SCENARIO_SCRIPT = (id: string): string => `n=0
+[ -d /proc/self ] && for p in $(ls /proc | grep -E '^[0-9]+$'); do
+  { tr '\\0' '\\n' < /proc/$p/environ; } 2>/dev/null | grep -qx 'CRASHTEST_SCENARIO=${id}' || continue
+  kill "$p" 2>/dev/null && n=$((n+1))
+done
+echo "$n"`
+
+export async function reapScenario(runtime: Runtime, scenarioId: string): Promise<number> {
+  if (!/^[\w-]+$/.test(scenarioId)) return 0
+  const res = await runtime.run(SCENARIO_SCRIPT(scenarioId), 30_000)
+  return Number(res.output.trim().split('\n').pop()) || 0
+}
