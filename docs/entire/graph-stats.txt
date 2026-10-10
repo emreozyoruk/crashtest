@@ -1,0 +1,33 @@
+entire graph stats
+  repo:     /Users/emreozyoruk/Desktop/project/hackaton
+  sessions: /Users/emreozyoruk/.claude/projects/-Users-emreozyoruk-Desktop-project-hackaton
+  window:   --since 30d · 2 session(s), 14 transcript file(s)
+  covering: 2026-10-09T22:27:40Z → 2026-10-10T07:59:34Z
+
+graph calls: 6 · exploration calls: 193 · graph-first rate: 0% (0/2 sessions)
+
+graph calls by verb
+  verb                      calls    est. tokens
+  init-agents                   2            204
+  version                       2            185
+  neighbors                     1            523
+  search                        1            349
+  TOTAL                         6          1,263
+
+exploration calls (what the graph is meant to replace)
+  kind                      calls    est. tokens
+  Read (whole file)             9             68
+  Bash grep/find/read         184         38,094
+  TOTAL                       193         38,162
+
+session tokens (billed, read from transcript usage)
+  input 752 · cache write 1,765,240 · cache read 92,286,218 · output 294,842 · total 94,347,052
+
+ESTIMATED SAVINGS  ~249 tokens
+  credited graph calls: 2 of 6 (search/neighbors/impact only)
+  Model (assumption, not a measurement): each graph locate call (search/neighbors/impact)
+  is credited with the ONE whole-file read it replaced. Counterfactual = on-disk size of
+  the top-hit file that call pointed at (the repo's median tracked-file size when the path
+  cannot be resolved), minus the bytes the graph call actually returned, floored at 0,
+  converted at 4 bytes = 1 token. Real savings depend on what you would actually have read
+  instead; treat this as an estimate, not ground truth.
