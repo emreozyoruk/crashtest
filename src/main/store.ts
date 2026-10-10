@@ -36,8 +36,11 @@ export function loadStore(): void {
   mkdirSync(workspacesDir(), { recursive: true })
   projects = readJson<Project[]>('projects.json', [])
   settings = { ...DEFAULT_SETTINGS, ...readJson<Partial<Settings>>('settings.json', {}) }
-  // A crash mid-run leaves scenarios marked as running; reset them so they can be re-run.
+  // A quit or crash mid-task leaves projects and scenarios marked as busy; nothing is running
+  // after a restart, so put them back where the user can start again.
+  const busy = new Set(['cloning', 'choosing_product', 'inventory', 'scenarios', 'bootstrapping', 'sweeping'])
   for (const p of projects) {
+    if (busy.has(p.phase)) p.phase = p.scenarios.length ? 'ready' : 'failed'
     for (const s of p.scenarios) if (s.status === 'running') s.status = 'not_run'
   }
 }

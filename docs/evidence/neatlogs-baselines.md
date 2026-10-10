@@ -19,3 +19,16 @@ What the traces showed:
 ## Detections created in neatlogs (group "Crashtest agent")
 - **Bug found by Crashtest** — regex on `scenario-sweep` output (`Status: broken`). Backfill flagged S-118 and S-125.
 - **Unverified verdict** — regex on `scenario-sweep` output for admissions like "could not check" / "may have come from". It flagged S-125, where the runner wrote a token into localStorage, got a blank profile page and could not check the UI. Fix: the runner must sign in through the app's form and read console/network errors before judging a blank page.
+
+## scenario-sweep S-125 (Cannot follow yourself): before/after the sign-in fix
+
+| Run | When (UTC) | Verdict | What the runner checked | "Unverified verdict" detection |
+|---|---|---|---|---|
+| Before | 07:28 | broken | API only; wrote a token into localStorage, profile page rendered blank ([screenshot](conduit-S-125-profile.png)), UI not checked | flagged |
+| After | 07:45 | broken | Signed in through the UI; own profile hides Follow (UI correct); API still accepts a self-follow ([screenshot](conduit-S-125-profile-after.png)) | not flagged |
+
+Same bug, but the verdict now rests on everything the scenario asks for, and it separates what is right (UI) from what is broken (API).
+
+## Runtime hygiene found by running it
+- The bootstrap agent's daemonized Postgres outlived a run → services now run in the foreground under `start_background`, data in `.crashtest/`, plus explicit `cleanup` commands.
+- Quitting Crashtest mid-run left services alive and the project stuck in "Starting the app" → live runtimes are torn down on quit, and stuck phases reset on launch. Verified: no listener left after quitting mid-bootstrap.

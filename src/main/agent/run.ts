@@ -74,6 +74,21 @@ async function recover(project: Project, runtime: Runtime, boot: BootResult): Pr
   })
 }
 
+// Runtimes with a live app, so quitting Crashtest mid-run still stops what the agent started.
+const live = new Map<string, { runtime: Runtime; cleanup: string[] }>()
+
+async function teardown(projectId: string): Promise<void> {
+  const entry = live.get(projectId)
+  if (!entry) return
+  live.delete(projectId)
+  for (const cmd of entry.cleanup) await entry.runtime.run(cmd, 30_000).catch(() => undefined)
+  await entry.runtime.dispose()
+}
+
+export async function teardownAll(): Promise<void> {
+  await Promise.all([...live.keys()].map(teardown))
+}
+
 function setStatus(project: Project, scenario: Scenario, patch: Partial<Scenario>): void {
   Object.assign(scenario, patch)
   publishProject(project)
@@ -93,7 +108,8 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
   const target = await chooseTarget(project)
   const runtime = await openRuntime(project, target)
   if (!runtime) return
-  let cleanup: string[] = []
+  const entry = { runtime, cleanup: [] as string[] }
+  live.set(project.id, entry)
   try {
     project.phase = 'bootstrapping'
     publishProject(project)
@@ -108,7 +124,7 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
         signal
       })
     )
-    cleanup = boot.cleanup ?? []
+    entry.cleanup = boot.cleanup ?? []
     if (!boot.ok) {
       const need = boot.missingEnv.length ? `\n\nI need: ${boot.missingEnv.map((v) => `\`${v}\``).join(', ')} — send them here and press Start again.` : ''
       postMessage(project.id, 'agent', `I couldn't get the app running: ${boot.reason}${need}`)
@@ -155,8 +171,7 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
         (count('broken') ? '\nOpen a broken scenario to see the root cause and the suggested fix.' : '')
     )
   } finally {
-    for (const cmd of cleanup) await runtime.run(cmd, 30_000).catch(() => undefined)
-    await runtime.dispose()
+    await teardown(project.id)
     project.phase = 'done'
     publishProject(project)
   }
