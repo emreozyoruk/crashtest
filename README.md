@@ -12,6 +12,16 @@ Give it a GitHub repo and it:
 
 Built during [neatHack](https://neatlogs.com/hackathon) (Oct 10–12, 2026). Build log: [hackathon.md](hackathon.md).
 
+> 🔴 **Live now:** [watch Crashtest test neatroots](http://34.238.91.131:8080) — every dot is one scenario; the yellow spark is the one being tried right now.
+
+## neatlogs asked us to test their own product
+
+After our first post, neatlogs' head of product engineering [replied](https://x.com/kurokotetsuyami/status/2108943094809071674): *"run this on neatroots, & share your findings with me"*. So we did. Crashtest mapped [neatlogs/neatroots](https://github.com/neatlogs/neatroots) into **581 scenarios across 12 user journeys** in under 5 minutes, booted it on a server by itself, and started running all of them.
+
+The 78 core P1 scenarios: **✅ 56 · ❌ 16 · ⏭ 6**, and every broken verdict checked by hand against the source. Real bugs include a JSON trace with a malformed `resourceSpans` accepted with `200` and silently dropped (`otlp/codec.ts:202`), `retention.days: 0` in `config.yaml` deleting every unpinned run on start (the API rejects 0, the config file does not), and unknown `/api/*` routes answering `200` with the web app's HTML. Each one has repro steps, `file:line` and a one-line fix: [docs/evidence/findings-neatroots.md](docs/evidence/findings-neatroots.md).
+
+![Crashtest × neatroots](docs/evidence/neatroots-findings.png)
+
 ## What it found on its first real target
 
 On [TonyMckes/conduit-realworld-example-app](https://github.com/TonyMckes/conduit-realworld-example-app), a well-known RealWorld implementation, Crashtest mapped 39 surfaces into **294 scenarios** across 9 journeys in 143 s, booted the app from scratch (local Postgres, generated `.env`, API + frontend) and ran **every one of them**:
