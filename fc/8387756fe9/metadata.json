@@ -1,0 +1,29 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "fc8387756fe9",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "docs/evidence/conduit-p1-scenarios.png",
+    "docs/evidence/findings-conduit-p1-full.md",
+    "docs/evidence/findings-conduit.md",
+    "src/main/agent/report.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/fc/8387756fe9/0/metadata.json",
+      "transcript": "/fc/8387756fe9/0/full.jsonl",
+      "compact_transcript": "/fc/8387756fe9/0/transcript.jsonl",
+      "content_hash": "/fc/8387756fe9/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 22,
+    "cache_creation_tokens": 18196,
+    "cache_read_tokens": 4490163,
+    "output_tokens": 6886,
+    "api_call_count": 11
+  }
+}
