@@ -26,7 +26,7 @@ On [TonyMckes/conduit-realworld-example-app](https://github.com/TonyMckes/condui
 
 We checked the top findings against the source by hand. Details, diffs and screenshots: [docs/evidence/findings-conduit.md](docs/evidence/findings-conduit.md).
 
-It is not tied to one app: on [thedevs-network/kutt](https://github.com/thedevs-network/kutt) (URL shortener) the same build mapped 50 surfaces into **359 scenarios across 11 journeys** in 144 s.
+It is not tied to one app: on [thedevs-network/kutt](https://github.com/thedevs-network/kutt) (URL shortener) the same build mapped 50 surfaces into **359 scenarios across 11 journeys** in 144 s, then ran all 141 P1 scenarios: **✅ 97 · ❌ 31 · ⏭ 13**. Worst one: deleting a domain "without its links" deletes every link on it, because the checkbox sanitizer passes the string `"false"` through as truthy. [docs/evidence/findings-kutt.md](docs/evidence/findings-kutt.md).
 
 ## How it works
 

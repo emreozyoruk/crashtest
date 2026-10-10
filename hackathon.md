@@ -72,6 +72,11 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - neatlogs: added **Server error in app under test** and **Auth or account bug found** detections; with the existing two they now count 39 / 57 / 108 bugs and 21 unverified verdicts (~7%) across these runs.
 - Second app: kutt (URL shortener) → 50 surfaces, **359 scenarios across 11 journeys** in 144 s on the same build.
 
+### 2026-10-10 (Sat) — 03:48–05:35 PDT — a second app: kutt
+- All 141 P1 scenarios on kutt (URL shortener, SQLite), app booted by the agent: **✅ 97 · ❌ 31 · ⏭ 13 → 15 files**, 104 minutes. Worst: deleting a domain "without its links" deletes them all (`"false"` is truthy after the checkbox sanitizer) — checked by hand. Also a race that creates two admins on a fresh install, and `data:`/`javascript:` link targets accepted. [docs/evidence/findings-kutt.md](docs/evidence/findings-kutt.md)
+- **An overstated verdict, caught and fixed.** "Expired links still redirect" ignored kutt's 30 s cleanup cron. New runner rule: find the job behind time-based behavior and report a delay as a delay. Re-run: the verdict now cites `server/cron.js` and the real window (up to 30 s; 15 min with the Redis cache).
+- Decided against shipping a `.dmg` this weekend: unsigned builds hit Gatekeeper, and the SDK and Playwright binaries would have to come out of the asar. README keeps "run from source".
+
 ## Building in public
 - 2026-10-09 announcement: https://x.com/kurokotetsuyami/status/2108778646320390337
 
