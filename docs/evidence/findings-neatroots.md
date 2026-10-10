@@ -23,7 +23,7 @@ neatlogs' head of product engineering ([the ask](https://x.com/kurokotetsuyami/s
 
 ## Verified findings
 
-Bugs 1–5 come from the 78 core scenarios; bugs 6–18 from the run of the remaining scenarios, which is still going.
+Bugs 1–5 come from the 78 core scenarios; bugs 6–19 from the run of the remaining scenarios, which is still going.
 
 ### 1. A JSON OTLP body with a non-array `resourceSpans` is accepted and silently dropped (S-047)
 - **Do:** `POST /v1/traces` with `Content-Type: application/json` and `{"resourceSpans": "oops"}`.
@@ -198,6 +198,14 @@ Bugs 1–5 come from the 78 core scenarios; bugs 6–18 from the run of the rema
   and both labels get the same share; after normalising, `yes` is 0.5 and `answerFromDistribution` treats `>= 0.5`
   as yes (`decision.ts:73`).
 - **Fix:** when the reply has no parsable answer, return no decision (or retry) instead of building a distribution.
+
+### 19. Stopping an in-app chat can leave it "running" with orphaned processes (S-471)
+- **Do:** in the app's chat with Claude Code or Codex, start a turn that runs tools, then press Stop.
+- **Actual:** the session stays "running" and the agent's child processes keep going.
+- **Why:** `agents/chat.ts:204` sends SIGTERM to the agent CLI only; it is spawned without its own process group
+  (`chat.ts:239`), so its children survive and keep the stdout pipe open. The turn only ends on `close`
+  (`chat.ts:263`), which waits for every pipe to close.
+- **Fix:** spawn with `detached: true` and stop the whole group (`process.kill(-pid)`), and end the turn on `exit`.
 
 ## Gap
 - **Runs can be deleted only through the API (S-092).** `DELETE /api/runs/:traceId` exists
