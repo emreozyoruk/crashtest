@@ -32,3 +32,11 @@ Every commit made from a Claude Code session gets an Entire checkpoint (session
 transcript, prompts, file changes) on the `entire/checkpoints/v1` branch. Automatic push
 is off on purpose: each checkpoint is scanned for secrets before it is pushed by hand,
 because a checkpoint holds the full transcript.
+
+Mirror: https://entire.io/gh/emreozyoruk/crashtest
+
+| Checkpoint | Commit | Session |
+|---|---|---|
+| [`97c75579b386`](https://entire.io/gh/emreozyoruk/crashtest/commit/74641efd901999e96d69fd85f69dde70f3aa0a62) | `74641ef` Add Entire evidence | [`0980f640`](https://entire.io/gh/emreozyoruk/crashtest/session/0980f640-3a33-4eb8-9f12-89accc563cc3) |
+
+![Checkpoint 97c75579b386 on entire.io](../evidence/entire-checkpoint-97c75579b386.png)

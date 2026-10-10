@@ -44,6 +44,10 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - Fixed by running it: services leaking after quit, projects stuck as busy after a restart.
 - **VDS mode works end to end** on a t3.small EC2 (neatHack AWS credits, SSH only from our IP): Settings → Test connection ✅ → Start → VDS. Crashtest cloned Conduit on the server, booted Postgres + API there, tunnelled the app back to the browser on the Mac and ran S-001 ✅ and S-118 ❌ (same bug reproduced remotely). Nothing left running on the server afterwards.
 
+### 2026-10-10 (Sat) — 01:00–01:10 PDT — Entire checkpoints live
+- First clean checkpoint from a fresh session: [`97c75579b386`](https://entire.io/gh/emreozyoruk/crashtest/commit/74641efd901999e96d69fd85f69dde70f3aa0a62) on commit `74641ef`. Scanned against every known secret before pushing `entire/checkpoints/v1` (only harmless matches: a regex pattern and an env var name). Repo mirrored on Entire: https://entire.io/gh/emreozyoruk/crashtest
+- Entire evidence in [docs/entire/](docs/entire/README.md): graph snapshot of Crashtest (70 files, 723 symbols, 1,837 relations) and `entire graph stats` over our build sessions.
+
 ## Building in public
 - 2026-10-09 announcement: https://x.com/kurokotetsuyami/status/2108778646320390337
 
@@ -57,6 +61,6 @@ Pending.
 - [ ] Public repo with commits dated during the hackathon
 - [ ] Demo video ≤ 3 min covering neatlogs, Entire and cfo.ai
 - [ ] neatlogs evidence (before/after traces, failure recovery run)
-- [ ] Entire checkpoint link + ID
+- [x] Entire checkpoint link + ID — [`97c75579b386`](https://entire.io/gh/emreozyoruk/crashtest/commit/74641efd901999e96d69fd85f69dde70f3aa0a62)
 - [ ] cfo.ai business plan
 - [ ] Quote post of the official neatlogs submission post (Mon Oct 12, 06:30–11:25 PDT)
