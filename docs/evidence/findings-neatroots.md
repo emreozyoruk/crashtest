@@ -13,7 +13,11 @@ neatlogs' head of product engineering ([the ask](https://x.com/kurokotetsuyami/s
   `packages/neatroots`, starts `dist/cli.js start`) in about 3 minutes, and tunneled it back to a browser
   on the Mac.
 - It ran the **78 P1 scenarios** of the five core journeys: send traces, browse runs and findings, manage
-  checks, ask/explain/replay, and import. Result: **45 passed · 19 broken · 14 skipped**.
+  checks, ask/explain/replay, and import. First pass: 45 passed · 19 broken · 14 skipped.
+- Most skips needed an LLM. A second pass of 16 scenarios started neatroots' own mock LLM (given to Crashtest
+  as a setup note in chat) and ran on the fixed runner below: 11 passed · 0 broken · 5 skipped.
+  **Final: 56 passed · 16 broken · 6 skipped.** Of the 16 broken, 7 are the five bugs below, 1 is the gap, and
+  8 are expectations the scenario writer assumed (listed at the end).
 - Every "broken" verdict below was then checked by hand against the source, and reproduced where it could
   be. Verdicts that did not hold up are listed at the end, with what we changed in Crashtest because of them.
 
@@ -87,7 +91,7 @@ neatlogs' head of product engineering ([the ask](https://x.com/kurokotetsuyami/s
   offers re-run checks, ask, send to cloud and download.
 
 ## What held up
-Highlights from the 45 scenarios that passed:
+Highlights from the 56 scenarios that passed:
 - OTLP over HTTP JSON, gzipped protobuf and gRPC on 4317; a 70 MB body is refused with `413`.
 - Loopback-only bind and the DNS-rebinding guard (403 for a foreign `Host`); no API path returns the stored
   cloud token, only `has_token`.
@@ -96,14 +100,18 @@ Highlights from the 45 scenarios that passed:
 - Check ids with path traversal are refused on save and delete; library checks cannot be deleted, only disabled.
 - Unfinished checks resume after a `kill -9` restart; run status moves through its lifecycle live.
 - Whole-run replay with a different input records the override, links the new run and leaves the original
-  untouched.
+  untouched; replaying one LLM span (`span_id`) creates a linked replay of just that call.
+- 50 parallel OTLP exports, all stored with the right span counts.
+- With the mock LLM: Explain finding and Explain run return a cause, a fix and evidence spans; prompt-injection
+  text in tool outputs does not leak into Ask answers or check drafts. Dismissing a finding expires its pending note.
+- Not reachable from another host on the network (no answer on the LAN IP), so checks cannot be saved or deleted remotely.
 
 ## Verdicts that did not hold up, and what changed in Crashtest
 | Scenario | Crashtest said | Actually | Change in Crashtest |
 |---|---|---|---|
-| S-051 | Host guard not enforced | Our boot agent's proxy rewrote `Host`; direct requests get 403 | The runner now gets the boot notes and tests anything a workaround changes directly against the app |
-| S-084, S-092 | No findings page / no delete button is a bug | Findings live inside each run by design; delete is listed above as a gap | A feature the app never had is "skipped", not broken |
-| S-261 | `spanId` ignored on replay | The API, UI and MCP tools all use `span_id` | The runner follows the app's own API contract |
+| S-051 | Host guard not enforced | Our boot agent's proxy rewrote `Host`; direct requests get 403 | The runner now gets the boot notes and tests anything a workaround changes directly against the app. **Re-run: passed** (curl straight to 4100) |
+| S-084, S-092 | No findings page / no delete button is a bug | Findings live inside each run by design; delete is listed above as a gap | A feature the app never had is "skipped", not broken. **Re-run of S-084: skipped** ("the app has no findings view") |
+| S-261 | `spanId` ignored on replay | The API, UI and MCP tools all use `span_id` | The runner follows the app's own API contract. **Re-run: passed** with `span_id` |
 | S-155, S-162, S-173, S-265, S-296, S-297, S-300 | Output or wording differs from the scenario | Expectations the scenario writer assumed | Covered by the same rules |
 | S-262 | Replays readable across projects | neatroots is single-user and local; projects are not an access boundary | — |
 
