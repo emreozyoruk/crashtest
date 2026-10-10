@@ -14,7 +14,19 @@ export interface SshTarget {
   privateKey?: string
 }
 
-function connect(target: SshTarget): Promise<Client> {
+// Network errors (a Wi-Fi switch, a sleeping Mac) are retried; a rejected key or password is not.
+async function connect(target: SshTarget): Promise<Client> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await connectOnce(target)
+    } catch (err) {
+      if (attempt === 3 || (err as { level?: string }).level === 'client-authentication') throw err
+      await new Promise((r) => setTimeout(r, attempt * 3_000))
+    }
+  }
+}
+
+function connectOnce(target: SshTarget): Promise<Client> {
   return new Promise((resolve, reject) => {
     const client = new Client()
     const config: ConnectConfig = {
