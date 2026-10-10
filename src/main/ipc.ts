@@ -1,7 +1,10 @@
 import { ipcMain, shell } from 'electron'
+import { existsSync, readFileSync } from 'fs'
+import { isAbsolute, join, normalize } from 'path'
 import type { SecretName, Settings } from '../shared/types'
 import { deleteProject, getProject, getSettings, listProjects, saveSettings } from './store'
-import { secretStatus, setSecret } from './secrets'
+import { getSecret, secretStatus, setSecret } from './secrets'
+import { testSsh } from './runtime/ssh'
 import { postMessage } from './events'
 import { cancel, chooseAction, createProject, guard, isBusy } from './agent/orchestrator'
 import { chat } from './agent/chat'
@@ -47,10 +50,23 @@ export function registerIpc(): void {
     if (project) startRun(project, scenarioIds)
   })
 
+  // Screenshots live inside the project workdir; return them as data URLs for the renderer.
+  ipcMain.handle('files:image', (_e, projectId: string, path: string) => {
+    const project = getProject(projectId)
+    if (!project) return null
+    const full = normalize(isAbsolute(path) ? path : join(project.workdir, path))
+    if (!full.startsWith(project.workdir) || !existsSync(full)) return null
+    return `data:image/png;base64,${readFileSync(full).toString('base64')}`
+  })
+
   ipcMain.handle('run:stop', (_e, projectId: string) => cancel(projectId))
 
   ipcMain.handle('settings:get', () => ({ settings: getSettings(), secrets: secretStatus() }))
   ipcMain.handle('settings:save', (_e, next: Settings) => saveSettings(next))
+  ipcMain.handle('vds:test', async () => {
+    const { ssh } = getSettings()
+    return testSsh({ ...ssh, password: getSecret('sshPassword'), privateKey: getSecret('sshPrivateKey') })
+  })
   ipcMain.handle('secrets:set', (_e, name: SecretName, value: string) => {
     setSecret(name, value)
     return secretStatus()

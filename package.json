@@ -25,6 +25,8 @@
     "@anthropic-ai/sdk": "^0.133.0",
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
     "@playwright/mcp": "^0.0.83",
     "neatlogs": "^1.1.28",
     "ssh2": "^1.17.0",

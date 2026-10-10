@@ -1,4 +1,6 @@
-import './assets/main.css'
+import '@fontsource-variable/archivo'
+import '@fontsource/jetbrains-mono/400.css'
+import './styles.css'
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'

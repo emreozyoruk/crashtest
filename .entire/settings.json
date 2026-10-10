@@ -1,16 +1,17 @@
 {
   "enabled": true,
+  "strategy_options": {
+    "push_sessions": false,
+    "summarize": {
+      "enabled": true
+    }
+  },
   "summary_generation": {
     "provider": "claude-code"
   },
   "checkpoints": {
     "primary": {
       "type": "git-branch"
-    }
-  },
-  "strategy_options": {
-    "summarize": {
-      "enabled": true
     }
   }
 }
