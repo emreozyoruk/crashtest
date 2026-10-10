@@ -1,0 +1,68 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "c274ac2e0387",
+  "session_id": "0980f640-3a33-4eb8-9f12-89accc563cc3",
+  "strategy": "manual-commit",
+  "created_at": "2026-10-10T08:11:45.484584Z",
+  "branch": "main",
+  "checkpoints_count": 5,
+  "files_touched": [
+    "README.md",
+    "docs/entire/README.md",
+    "docs/evidence/entire-checkpoint-97c75579b386.png",
+    "hackathon.md"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5",
+  "turn_id": "1afde754f75f",
+  "checkpoint_transcript_start": 495,
+  "transcript_lines_at_start": 495,
+  "compact_transcript_start": 87,
+  "token_usage": {
+    "input_tokens": 4,
+    "cache_creation_tokens": 2518,
+    "cache_read_tokens": 528704,
+    "output_tokens": 2309,
+    "api_call_count": 2
+  },
+  "session_metrics": {
+    "turn_count": 5
+  },
+  "summary": {
+    "intent": "Create or refresh an Entire checkpoint for a hackathon project, ensuring the commit message trailer and the documentation and evidence files (README, docs/entire, screenshot, hackathon.md) are correct and redacted.",
+    "outcome": "A new checkpoint (98bc1d77a613) was created. The commit message was corrected to remove the stale trailer from the deleted checkpoint. Redactions were added and the checkpoint was regenerated, with README.md, docs/entire/README.md, hackathon.md and the evidence screenshot modified.",
+    "learnings": {
+      "repo": [
+        "Commit messages can carry a trailer referencing a checkpoint ID. After a checkpoint is deleted and recreated, the old trailer can remain alongside the new one and must be fixed manually.",
+        "Checkpoint evidence is stored under docs/evidence/ as entire-checkpoint-<id>.png, and docs/entire/README.md documents the checkpoint. These files need updating when the checkpoint ID changes.",
+        "The checkpoint output is scanned for sensitive content. Redactions are added to the checkpoint and it is then regenerated."
+      ],
+      "code": [],
+      "workflow": [
+        "The commit message can be amended without running hooks, so the hooks do not re-trigger checkpoint creation.",
+        "After fixing the trailer, scan the correct checkpoint directory (the new ID) rather than the old one."
+      ]
+    },
+    "friction": [
+      "The new commit message kept the trailer of the deleted checkpoint, which required a manual fix.",
+      "The scan had to be re-pointed at the correct checkpoint directory.",
+      "Redactions had to be added after the scan, and the checkpoint regenerated, which means extra iterations."
+    ],
+    "open_items": [
+      "The evidence screenshot is still named for the older checkpoint (97c75579b386), while the current checkpoint is 98bc1d77a613. The file name and docs references may need to be made consistent.",
+      "Confirm that the regenerated checkpoint passes the scan with no remaining sensitive content."
+    ]
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-10-10T08:11:38.970022Z",
+    "agent_lines": 0,
+    "agent_removed": 0,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 0,
+    "total_lines_changed": 0,
+    "agent_percentage": 0,
+    "metric_version": 2
+  }
+}
