@@ -81,6 +81,8 @@ async function openRuntime(project: Project, target: RunTarget): Promise<Runtime
   return runtime
 }
 
+const SCENARIO_LIMIT_MS = 15 * 60_000
+
 async function reapLeftovers(project: Project, runtime: Runtime): Promise<void> {
   const n = await reapStale(runtime)
   if (n) postMessage(project.id, 'activity', `Stopped ${n} processes an earlier run left behind`)
@@ -232,6 +234,11 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
         }
         setStatus(project, scenario, { status: 'running' })
         postMessage(project.id, 'activity', `${scenario.id} · ${scenario.title}`)
+        // One stuck scenario must not hold a worker for the rest of the run.
+        const limit = new AbortController()
+        const timer = setTimeout(() => limit.abort(), SCENARIO_LIMIT_MS)
+        const stopRun = (): void => limit.abort()
+        signal.addEventListener('abort', stopRun)
         try {
           const verdict = await trace(
             {
@@ -251,7 +258,7 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
                 inventory: project.inventory,
                 bootNotes: boot.notes,
                 parallel,
-                signal
+                signal: limit.signal
               })
           )
           setStatus(project, scenario, {
@@ -264,10 +271,19 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
           }
         } catch (err) {
           if (signal.aborted) throw err
-          setStatus(project, scenario, {
-            status: 'not_run',
-            notes: `Runner error: ${(err as Error).message}`
-          })
+          setStatus(
+            project,
+            scenario,
+            limit.signal.aborted
+              ? {
+                  status: 'skipped',
+                  notes: `Stopped after ${SCENARIO_LIMIT_MS / 60_000} minutes without a verdict.`
+                }
+              : { status: 'not_run', notes: `Runner error: ${(err as Error).message}` }
+          )
+        } finally {
+          clearTimeout(timer)
+          signal.removeEventListener('abort', stopRun)
         }
       }
     }
