@@ -23,7 +23,7 @@ neatlogs' head of product engineering ([the ask](https://x.com/kurokotetsuyami/s
 
 ## Verified findings
 
-Bugs 1–5 come from the 78 core scenarios; bugs 6–16 from the run of the remaining scenarios, which is still going.
+Bugs 1–5 come from the 78 core scenarios; bugs 6–18 from the run of the remaining scenarios, which is still going.
 
 ### 1. A JSON OTLP body with a non-array `resourceSpans` is accepted and silently dropped (S-047)
 - **Do:** `POST /v1/traces` with `Content-Type: application/json` and `{"resourceSpans": "oops"}`.
@@ -180,6 +180,24 @@ Bugs 1–5 come from the 78 core scenarios; bugs 6–16 from the run of the rema
   single-flight (`this.installing ??=`, `laya.ts:117`), and when it resolves both callers continue to
   `await this.start()` (`laya.ts:120`), which spawns a server each time.
 - **Fix:** make `start()` single-flight like the install, or re-check the state after awaiting the install.
+
+### 17. Searching runs for `%` or `_` matches everything (S-412)
+- **Do:** search runs (web search, `GET /api/runs?q=%`, or the MCP `search_runs` tool) for `%`.
+- **Actual:** every run comes back; `_` matches any single character.
+- **Why:** `store/db.ts:683` builds the pattern as `` `%${f.text}%` `` and uses it with `LIKE` without escaping `%`,
+  `_` or `\`.
+- **Fix:** escape the three characters and add `ESCAPE '\'` to the `LIKE` clauses.
+
+### 18. An unreadable LLM answer is recorded as "yes" (S-387)
+- **Do:** with the LLM decision backend and no logprobs, have the model answer a yes/no question with plain prose
+  instead of JSON.
+- **Actual:** the answer is stored as `choice: "yes"` with probability 0.5 instead of an error or "no answer". With
+  the default flag threshold (0.6) it raises nothing on its own, but the decision record is wrong, and a check with
+  a lower threshold would flag on it.
+- **Why:** `parseJsonLoose` returns `undefined` (`models/llm.ts:660-674`), so `chosen` is `""` (`models/decision.ts:301-302`)
+  and both labels get the same share; after normalising, `yes` is 0.5 and `answerFromDistribution` treats `>= 0.5`
+  as yes (`decision.ts:73`).
+- **Fix:** when the reply has no parsable answer, return no decision (or retry) instead of building a distribution.
 
 ## Gap
 - **Runs can be deleted only through the API (S-092).** `DELETE /api/runs/:traceId` exists
