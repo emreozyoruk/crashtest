@@ -1,0 +1,17 @@
+<task-notification>
+<task-id>bxd7f4plc</task-id>
+<tool-use-id>toolu_01BHc7z6amRMz7HtJxuCh4bM</tool-use-id>
+<output-file>/private/tmp/claude-502/-Users-emreozyoruk-Desktop-project-hackaton/56513bf4-5efb-4d2d-82ae-f739e0b24cc4/tasks/bxd7f4plc.output</output-file>
+<status>completed</status>
+<summary>Background command "Run fresh Conduit analysis in the built app" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>bgy1052vf</task-id>
+<tool-use-id>toolu_01RbU8P3Yv3AA2pT7D2U2k34</tool-use-id>
+<output-file>/private/tmp/claude-502/-Users-emreozyoruk-Desktop-project-hackaton/56513bf4-5efb-4d2d-82ae-f739e0b24cc4/tasks/bgy1052vf.output</output-file>
+<status>completed</status>
+<summary>Background command "Re-run Conduit analysis with the fix" completed (exit code 0)</summary>
+</task-notification>
