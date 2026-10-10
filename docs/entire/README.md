@@ -40,3 +40,10 @@ Mirror: https://entire.io/gh/emreozyoruk/crashtest
 | [`97c75579b386`](https://entire.io/gh/emreozyoruk/crashtest/commit/74641efd901999e96d69fd85f69dde70f3aa0a62) | `74641ef` Add Entire evidence | [`0980f640`](https://entire.io/gh/emreozyoruk/crashtest/session/0980f640-3a33-4eb8-9f12-89accc563cc3) |
 
 ![Checkpoint 97c75579b386 on entire.io](../evidence/entire-checkpoint-97c75579b386.png)
+
+By the end of day 1 the session had produced **13 checkpoints**, every one scanned before push.
+
+## 4. Dispatch
+
+[dispatch-2026-10-10.md](dispatch-2026-10-10.md) is Entire's own summary of what shipped on day 1,
+generated from those checkpoints with `entire dispatch`.
