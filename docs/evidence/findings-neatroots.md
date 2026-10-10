@@ -23,7 +23,7 @@ neatlogs' head of product engineering ([the ask](https://x.com/kurokotetsuyami/s
 
 ## Verified findings
 
-Bugs 1–5 come from the 78 core scenarios; bugs 6–7 from the run of the remaining scenarios, which is still going.
+Bugs 1–5 come from the 78 core scenarios; bugs 6–11 from the run of the remaining scenarios, which is still going.
 
 ### 1. A JSON OTLP body with a non-array `resourceSpans` is accepted and silently dropped (S-047)
 - **Do:** `POST /v1/traces` with `Content-Type: application/json` and `{"resourceSpans": "oops"}`.
@@ -77,7 +77,7 @@ Bugs 1–5 come from the 78 core scenarios; bugs 6–7 from the run of the remai
 - **Fix (one option):** for file imports, derive ids from the record with the existing deterministic
   `hexId` in `ingest/build.ts:60`, e.g. `hexId(JSON.stringify(record), 16)`, and keep random ids for live traffic.
 
-### 5. With no LLM configured, Ask and Explain show a raw "fetch failed" (S-088, S-256)
+### 5. With no LLM configured, Ask, Explain and Draft check show a raw "fetch failed" (S-088, S-256, S-115, S-195)
 - **Do:** with no reachable LLM, use Ask, or "Explain finding" on a run.
 - **Actual:** `503 {"error":"fetch failed"}`; the UI toast reads "Couldn't explain this finding: fetch failed".
   Nothing says an LLM is missing or where to set one up.
@@ -105,6 +105,39 @@ Bugs 1–5 come from the 78 core scenarios; bugs 6–7 from the run of the remai
 - **Why:** `packages/neatroots/src/cli.ts:119-145` writes the folder, README and `.env` before the steering checks
   at `cli.ts:146-155`.
 - **Fix:** validate `--steering` and `--project` at the top of the `init` action, before any write.
+
+### 8. A `match` check's regex can freeze the whole server, and a bad one fails silently (S-194, S-193)
+- **Do:** save a `match` check with a catastrophic pattern such as `(a+)+$`, then preview it or send a span with a
+  long run of `a`s followed by `!`. Separately, save one with an invalid pattern such as `(`.
+- **Actual:** the first evaluation took 33 s on a 30-character input and blocked every request meanwhile (the health
+  check timed out), including the collector. The invalid pattern is saved, previews as "0 hits, no warnings", and
+  never fires.
+- **Why:** `packages/neatroots/src/checks/rules.ts:107-114` compiles the user's pattern and calls `re.test()`
+  synchronously for every span with no time limit; `previewCheck` (`engine/engine.ts:1041-1052`) only checks its
+  deadline between runs. An invalid pattern hits the `catch { return null }` at `rules.ts:108-110`, and
+  `checks/types.ts:88` accepts any string as `pattern`.
+- **Fix:** validate patterns when a check is saved (compile them, and reject nested quantifiers or use a linear-time
+  engine such as RE2), and run rule evaluation off the request path with a time budget.
+
+### 9. `GET /api/runs?limit=abc` answers 500; `limit=-5` returns every run (S-106)
+- **Why:** `server/api.ts:171` passes `Number(q.limit)` straight through; `Number("abc")` is `NaN`, and
+  `Math.min(NaN, 500)` in `store/db.ts:689` stays `NaN`, so SQLite throws. A negative limit reaches `LIMIT` and SQLite
+  treats it as no limit.
+- **Fix:** parse `limit`/`offset` as integers, clamp to 1–500 and ≥ 0, and answer 400 for anything else.
+
+### 10. The runs list shows the newest 150 runs and no way to reach the rest (S-108)
+- **Do:** ingest more than 150 runs and open Runs.
+- **Actual:** the header reads "of 320 runs", but only 150 rows render and there is no pager or "load more"; the older
+  170 runs cannot be opened from the list.
+- **Why:** `packages/ui/src/features/runs/_services/run-queries.ts:9` always requests `limit=150` and never sends
+  `offset`. The API already pages correctly.
+- **Fix:** page with `offset` (or infinite scroll) in `useRuns` and the runs page.
+
+### 11. A choice check can flag an option that does not exist (S-202)
+- **Do:** save a `choice` check whose `flag_on` lists a key that is not in `options`.
+- **Actual:** saved with `200` and no warning; it can never fire.
+- **Why:** `checks/types.ts:132-141` types `flag_on` as any non-empty string array, with no check against `options`.
+- **Fix:** a `superRefine` that every `flag_on` entry is a key of `options`.
 
 ## Gap
 - **Runs can be deleted only through the API (S-092).** `DELETE /api/runs/:traceId` exists
