@@ -151,6 +151,32 @@ export default function SettingsView(): React.JSX.Element {
         </section>
 
         <section>
+          <h3>Scenario runner</h3>
+          <p className="hint">
+            The model that runs each scenario. Sonnet judges more carefully; Haiku costs about a
+            third as much.
+          </p>
+          <div className="segmented" role="radiogroup" aria-label="Scenario runner model">
+            {(
+              [
+                ['sonnet', 'Sonnet'],
+                ['haiku', 'Haiku']
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                className={settings.runnerModel === value ? 'on' : ''}
+                role="radio"
+                aria-checked={settings.runnerModel === value}
+                onClick={() => update({ ...settings, runnerModel: value })}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section>
           <h3>Your server (VDS)</h3>
           <p className="hint">
             Crashtest connects over SSH, copies the repo there, starts the app and tunnels it back

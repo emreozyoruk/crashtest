@@ -24,6 +24,7 @@ export interface AgentRunOptions {
   schema?: Record<string, unknown>
   maxTurns?: number
   mcpServers?: Record<string, unknown>
+  model?: string
   signal?: AbortSignal
 }
 
@@ -94,7 +95,7 @@ export async function runAgent<T = string>(opts: AgentRunOptions): Promise<Agent
   const stream = query({
     prompt: opts.prompt,
     options: {
-      model: AGENT_MODEL,
+      model: opts.model ?? AGENT_MODEL,
       cwd: opts.cwd,
       systemPrompt: opts.systemPrompt,
       // Only the built-in tools this phase needs are even offered to the model; MCP tools come from mcpServers.

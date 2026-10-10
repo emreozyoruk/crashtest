@@ -104,6 +104,8 @@ export interface Project {
 
 export interface Settings {
   defaultRunTarget: RunTarget | 'ask'
+  // Model that runs each scenario: Sonnet judges more carefully, Haiku costs about a third.
+  runnerModel: 'sonnet' | 'haiku'
   ssh: { host: string; port: number; username: string }
 }
 

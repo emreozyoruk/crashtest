@@ -5,6 +5,8 @@ import type { Runtime } from '../runtime/types'
 import { runAgent } from './runAgent'
 import { APP_TOOLS, appToolsServer } from './runtimeTools'
 import { GRAPH_TOOLS, graphServer } from './graphTools'
+import { RUNNER_MODELS } from './models'
+import { getSettings } from '../store'
 
 export interface SweepVerdict {
   status: 'passed' | 'broken' | 'skipped'
@@ -129,6 +131,7 @@ export async function runScenario(opts: {
       ...graph
     },
     schema: SCHEMA,
+    model: RUNNER_MODELS[getSettings().runnerModel],
     maxTurns: 40,
     signal: opts.signal
   })
