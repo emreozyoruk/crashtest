@@ -279,7 +279,13 @@ async function sweep(project: Project, selected: Scenario[], signal: AbortSignal
                   status: 'skipped',
                   notes: `Stopped after ${SCENARIO_LIMIT_MS / 60_000} minutes without a verdict.`
                 }
-              : { status: 'not_run', notes: `Runner error: ${(err as Error).message}` }
+              : /max_turns/.test((err as Error).message)
+                ? {
+                    status: 'skipped',
+                    notes:
+                      'Ran out of steps without a verdict. A stronger runner model (Settings → Scenario runner) may finish it.'
+                  }
+                : { status: 'not_run', notes: `Runner error: ${(err as Error).message}` }
           )
         } finally {
           clearTimeout(timer)
