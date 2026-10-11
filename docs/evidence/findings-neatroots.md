@@ -7,23 +7,46 @@ neatlogs' head of product engineering ([the ask](https://x.com/kurokotetsuyami/s
 
 ## What ran
 
-- Crashtest read the repo, found two products (neatroots and its steering hook), and mapped **neatroots**:
-  **581 scenarios** across 12 user journeys (219 P1 · 268 P2 · 94 P3), in under 5 minutes.
-- It booted neatroots by itself on an Ubuntu server (pnpm install, builds `packages/ui` and
-  `packages/neatroots`, starts `dist/cli.js start`) in about 3 minutes, and tunneled it back to a browser
-  on the Mac.
-- It ran the **78 P1 scenarios** of the five core journeys: send traces, browse runs and findings, manage
-  checks, ask/explain/replay, and import. First pass: 45 passed · 19 broken · 14 skipped.
-- Most skips needed an LLM. A second pass of 16 scenarios started neatroots' own mock LLM (given to Crashtest
-  as a setup note in chat) and ran on the fixed runner below: 11 passed · 0 broken · 5 skipped.
-  **Final: 56 passed · 16 broken · 6 skipped.** Of the 16 broken, 7 are bugs 1–5 below, 1 is the gap, and
-  8 are expectations the scenario writer assumed (listed at the end).
-- Every "broken" verdict below was then checked by hand against the source, and reproduced where it could
-  be. Verdicts that did not hold up are listed at the end, with what we changed in Crashtest because of them.
+**All 581 scenarios ran: ✅ 316 passed · ❌ 158 broken · ⏭ 107 skipped · 0 left.** We checked the broken
+verdicts by hand against the source: **21 are real bugs** (below), one is a gap, and the rest were wording or
+expectations the scenario writer assumed, design choices, or near-duplicates of a listed bug.
+
+- Crashtest read the repo, found two products (neatroots and its steering hook), and mapped **neatroots** into
+  **581 scenarios across 12 user journeys** (219 P1 · 268 P2 · 94 P3) in under 5 minutes.
+- It booted neatroots by itself on a 2-core, 2 GB Ubuntu server (pnpm install, two builds, start; plus
+  neatroots' own mock LLM, given as a setup note in chat) and tunneled it back to browsers on the Mac.
+- The first 94 scenarios ran one at a time on Sonnet; the remaining 487 ran on Haiku, three at a time. The five
+  that ran out of steps on Haiku were re-run on Sonnet, with Auto parallelism picking 2 at once from the
+  server's free memory: 3 passed, 1 broke, 1 skipped.
+
+| Priority | Scenarios | ✅ | ❌ | ⏭ |
+|---|---|---|---|---|
+| P1 | 219 | 126 | 51 | 42 |
+| P2 | 268 | 142 | 82 | 44 |
+| P3 | 94 | 48 | 25 | 21 |
+
+| Journey | Scenarios | ✅ | ❌ | ⏭ |
+|---|---|---|---|---|
+| Install, start and set up a project | 44 | 27 | 10 | 7 |
+| Send traces from my agent | 36 | 29 | 3 | 4 |
+| Browse runs and findings | 74 | 51 | 14 | 9 |
+| Manage checks | 61 | 44 | 13 | 4 |
+| Steer a running agent | 39 | 24 | 10 | 5 |
+| Ask, explain and replay runs | 41 | 20 | 15 | 6 |
+| Import runs from files and Neatlogs Cloud | 45 | 15 | 17 | 13 |
+| Configure models (LLM, Laya, Jev) | 56 | 22 | 20 | 14 |
+| Connect coding agents over MCP | 67 | 42 | 14 | 11 |
+| Chat with Claude Code or Codex in the app | 37 | 7 | 12 | 18 |
+| Send runs to Neatlogs Cloud | 47 | 22 | 20 | 5 |
+| Run in the background and maintain | 34 | 13 | 10 | 11 |
+
+Skipped, by reason: 33 need something a test run can't simulate (a real coding-agent CLI, a device, a real cloud
+account), 28 need a hosted LLM, cloud token or key we did not use, 16 assume a feature the app does not have,
+9 hit the 15-minute limit, 21 other.
 
 ## Verified findings
 
-Bugs 1–5 come from the 78 core scenarios; bugs 6–21 from the run of the remaining scenarios, which is still going.
+Bugs 1–5 came from the first 78 core scenarios, 6–21 from the rest.
 
 ### 1. A JSON OTLP body with a non-array `resourceSpans` is accepted and silently dropped (S-047)
 - **Do:** `POST /v1/traces` with `Content-Type: application/json` and `{"resourceSpans": "oops"}`.
@@ -230,7 +253,7 @@ Bugs 1–5 come from the 78 core scenarios; bugs 6–21 from the run of the rema
   offers re-run checks, ask, send to cloud and download.
 
 ## What held up
-Highlights from the 56 scenarios that passed:
+Highlights from the 316 scenarios that passed:
 - OTLP over HTTP JSON, gzipped protobuf and gRPC on 4317; a 70 MB body is refused with `413`.
 - Loopback-only bind and the DNS-rebinding guard (403 for a foreign `Host`); no API path returns the stored
   cloud token, only `has_token`.

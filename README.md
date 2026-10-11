@@ -16,9 +16,7 @@ Built during [neatHack](https://neatlogs.com/hackathon) (Oct 10–12, 2026). Bui
 
 ## neatlogs asked us to test their own product
 
-After our first post, neatlogs' head of product engineering [replied](https://x.com/kurokotetsuyami/status/2108943094809071674): *"run this on neatroots, & share your findings with me"*. So we did. Crashtest mapped [neatlogs/neatroots](https://github.com/neatlogs/neatroots) into **581 scenarios across 12 user journeys** in under 5 minutes, booted it on a server by itself, and started running all of them.
-
-The 78 core P1 scenarios: **✅ 56 · ❌ 16 · ⏭ 6**, and every broken verdict checked by hand against the source. Real bugs include a JSON trace with a malformed `resourceSpans` accepted with `200` and silently dropped (`otlp/codec.ts:202`), `retention.days: 0` in `config.yaml` deleting every unpinned run on start (the API rejects 0, the config file does not), and unknown `/api/*` routes answering `200` with the web app's HTML. Each one has repro steps, `file:line` and a one-line fix: [docs/evidence/findings-neatroots.md](docs/evidence/findings-neatroots.md).
+After our first post, neatlogs' head of product engineering [replied](https://x.com/kurokotetsuyami/status/2108943094809071674): *"run this on neatroots, & share your findings with me"*. So we did. Crashtest mapped [neatlogs/neatroots](https://github.com/neatlogs/neatroots) into **581 scenarios across 12 user journeys** in under 5 minutes, booted it on a 2 GB server by itself, and ran **every one of them: ✅ 316 · ❌ 158 · ⏭ 107**. We checked the broken verdicts by hand against the source: **21 real bugs**, among them turning steering off still letting a halt note stop the agent, one bad regex in a check freezing the whole server for 33 seconds, `retention.days: 0` in `config.yaml` deleting every run on start, and a large import upload crashing the server. Each one has repro steps, `file:line` and a fix: [docs/evidence/findings-neatroots.md](docs/evidence/findings-neatroots.md).
 
 ![Crashtest × neatroots](docs/evidence/neatroots-findings.png)
 

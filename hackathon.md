@@ -89,6 +89,18 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
   - A product choice made before a restart did nothing (pending questions live in memory). It now resumes the analysis.
 - The EC2 instance was stopped from outside mid-run (API stop, not from inside the VM). Restarted it; new IP.
 
+### 2026-10-10 (Sat) — 11:40–19:00 PDT — all 581 neatroots scenarios
+- Ran the remaining 503 scenarios on Haiku, three at a time on the VDS, then the five that ran out of steps on Sonnet.
+  **All 581: ✅ 316 · ❌ 158 · ⏭ 107, 0 left. 21 bugs verified by hand** — [docs/evidence/findings-neatroots.md](docs/evidence/findings-neatroots.md).
+- Built during the run, each tested before it shipped: parallel workers; Auto parallelism (reads the server's free
+  memory and says why it picked a number — "2 cores and 1.0 GB free… 2 at once" in the final run); a 15-minute limit
+  per scenario; stopping leftovers from an earlier run (pid files, only inside the app folder) and from each
+  scenario (an env tag, Linux); an isolated HOME for local runs; runner model choice (Sonnet/Haiku); setup notes;
+  steps-exhausted counted as skipped.
+- Kept the run alive through an outside stop of the EC2 instance (twice), a detached Elastic IP, a VPN that rotated our
+  IP, and memory spikes from neatroots itself (a 1.3 GB app copy, two Laya servers from one double-click — bug 16).
+- Live page for the run: http://34.238.91.131:8080.
+
 ## Building in public
 - 2026-10-09 announcement: https://x.com/kurokotetsuyami/status/2108778646320390337
 - 2026-10-10 full Conduit run (294 scenarios, 104 broken in 34 files): https://x.com/kurokotetsuyami/status/2108943094809071674
