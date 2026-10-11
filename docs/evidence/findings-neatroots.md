@@ -23,7 +23,7 @@ neatlogs' head of product engineering ([the ask](https://x.com/kurokotetsuyami/s
 
 ## Verified findings
 
-Bugs 1–5 come from the 78 core scenarios; bugs 6–19 from the run of the remaining scenarios, which is still going.
+Bugs 1–5 come from the 78 core scenarios; bugs 6–21 from the run of the remaining scenarios, which is still going.
 
 ### 1. A JSON OTLP body with a non-array `resourceSpans` is accepted and silently dropped (S-047)
 - **Do:** `POST /v1/traces` with `Content-Type: application/json` and `{"resourceSpans": "oops"}`.
@@ -118,6 +118,8 @@ Bugs 1–5 come from the 78 core scenarios; bugs 6–19 from the run of the rema
   `checks/types.ts:88` accepts any string as `pattern`.
 - **Fix:** validate patterns when a check is saved (compile them, and reject nested quantifiers or use a linear-time
   engine such as RE2), and run rule evaluation off the request path with a time budget.
+- **Same class elsewhere (S-540):** a catastrophic cloud redaction pattern freezes the server the same way during the
+  cloud preview; `server/api.ts:302-309` only checks that each pattern compiles.
 
 ### 9. `GET /api/runs?limit=abc` answers 500; `limit=-5` returns every run (S-106)
 - **Why:** `server/api.ts:171` passes `Number(q.limit)` straight through; `Number("abc")` is `NaN`, and
@@ -206,6 +208,21 @@ Bugs 1–5 come from the 78 core scenarios; bugs 6–19 from the run of the rema
   (`chat.ts:239`), so its children survive and keep the stdout pipe open. The turn only ends on `close`
   (`chat.ts:263`), which waits for every pipe to close.
 - **Fix:** spawn with `detached: true` and stop the whole group (`process.kill(-pid)`), and end the turn on `exit`.
+
+### 20. `neatroots update --version <tag>` prints the version instead of updating (S-555)
+- **Do:** `neatroots update --version v0.2.0`.
+- **Actual:** prints the installed version and exits 0; nothing is updated, so the user believes it worked.
+- **Why:** the root program registers `.version(VERSION)` (`cli.ts:27`), and without `enablePositionalOptions()` the
+  root consumes `--version` wherever it appears, before `update`'s own `--version <tag>` (`cli/service.ts:160`).
+- **Fix:** `program.enablePositionalOptions()` (and `.passThroughOptions()` where needed), or rename the option to `--tag`.
+
+### 21. The cloud endpoint allow-list is only enforced in the settings API (S-506, S-507)
+- **Do:** set `cloud.endpoint` in `config.yaml` to `http://example.com` (or a lookalike host), then forward a run.
+- **Actual:** the run and the Neatlogs API key are sent there, over plain HTTP.
+- **Why:** `allowedEndpoint()` (`server/api.ts:106-114`, https `*.neatlogs.com` or localhost) is called only when the
+  endpoint is saved through `POST /api/settings` (`api.ts:299`); the endpoint read from `config.yaml` is never checked.
+  Someone who can edit the config can do worse, so this is defence in depth, but the check exists and is easy to bypass.
+- **Fix:** apply `allowedEndpoint()` when the config is loaded and right before forwarding.
 
 ## Gap
 - **Runs can be deleted only through the API (S-092).** `DELETE /api/runs/:traceId` exists
