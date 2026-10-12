@@ -109,6 +109,7 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - 2026-10-10 cfo.ai business plan, unit costs from neatlogs traces: https://x.com/kurokotetsuyami/status/2109037159063953484
 - 2026-10-11 the 21 verified neatroots bugs, filed upstream: https://github.com/neatlogs/neatroots/issues/23
 - 2026-10-12 submission: https://x.com/kurokotetsuyami/status/2109674985359053114
+- 2026-10-12 neatlogs fixed the findings: ten merged on Oct 11 within hours of the report (neatroots #1–#10), more released in v0.2.8 (#15, #16, #18, #19), and the rest in https://github.com/neatlogs/neatroots/pull/40, which closes our issue #23.
 
 ## Demo
 - 2:39 walkthrough, captioned: [docs/demo.mp4](docs/demo.mp4). Akshay's ask on X → the 581 neatroots scenarios in the app → the live page → three of the 21 verified bugs → neatlogs incidents (a critical one it raised on its own from our traces, root cause and fix) and the `pkill` trace that made us block the command → Entire checkpoints and Graph → the cfo.ai plan.

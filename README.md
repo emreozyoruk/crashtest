@@ -18,6 +18,8 @@ Built during [neatHack](https://neatlogs.com/hackathon) (Oct 10–12, 2026). Bui
 
 After our first post, neatlogs' head of product engineering [replied](https://x.com/kurokotetsuyami/status/2108943094809071674): *"run this on neatroots, & share your findings with me"*. So we did. Crashtest mapped [neatlogs/neatroots](https://github.com/neatlogs/neatroots) into **581 scenarios across 12 user journeys** in under 5 minutes, booted it on a 2 GB server by itself, and ran **every one of them: ✅ 316 · ❌ 158 · ⏭ 107**. We checked the broken verdicts by hand against the source: **21 real bugs**, among them turning steering off still letting a halt note stop the agent, one bad regex in a check freezing the whole server for 33 seconds, `retention.days: 0` in `config.yaml` deleting every run on start, and a large import upload crashing the server. Each one has repro steps, `file:line` and a fix: [docs/evidence/findings-neatroots.md](docs/evidence/findings-neatroots.md).
 
+**neatlogs fixed them.** Within hours of the report, the neatroots team merged fixes for the first ten ([#1](https://github.com/neatlogs/neatroots/pull/1)–[#10](https://github.com/neatlogs/neatroots/pull/10)) and shipped more in v0.2.8 ([#15](https://github.com/neatlogs/neatroots/pull/15)); [PR #40](https://github.com/neatlogs/neatroots/pull/40) by their head of product engineering fixes the rest and closes [our issue](https://github.com/neatlogs/neatroots/issues/23). All 21 findings fixed or in review.
+
 ![Crashtest × neatroots](docs/evidence/neatroots-findings.png)
 
 ## What it found on its first real target
