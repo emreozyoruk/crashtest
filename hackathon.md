@@ -110,7 +110,7 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - 2026-10-11 the 21 verified neatroots bugs, filed upstream: https://github.com/neatlogs/neatroots/issues/23
 
 ## Demo
-- 2:15 walkthrough, captioned: [docs/demo.mp4](docs/demo.mp4). Akshay's ask on X → the 581 neatroots scenarios in the app → the live page → three of the 21 verified bugs → neatlogs traces and detections → Entire checkpoints and Graph → the cfo.ai plan.
+- 2:39 walkthrough, captioned: [docs/demo.mp4](docs/demo.mp4). Akshay's ask on X → the 581 neatroots scenarios in the app → the live page → three of the 21 verified bugs → neatlogs incidents (a critical one it raised on its own from our traces, root cause and fix) and the `pkill` trace that made us block the command → Entire checkpoints and Graph → the cfo.ai plan.
 
 ## Known limitations and next steps
 - Parallel runs averaged about 1.3× on a 2 GB server: long steering scenarios and model latency dominate. A bigger server or per-scenario sandboxes would scale it further.
