@@ -108,6 +108,7 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - 2026-10-10 live page of Crashtest testing neatroots: http://34.238.91.131:8080
 - 2026-10-10 cfo.ai business plan, unit costs from neatlogs traces: https://x.com/kurokotetsuyami/status/2109037159063953484
 - 2026-10-11 the 21 verified neatroots bugs, filed upstream: https://github.com/neatlogs/neatroots/issues/23
+- 2026-10-12 submission: https://x.com/kurokotetsuyami/status/2109674985359053114
 
 ## Demo
 - 2:39 walkthrough, captioned: [docs/demo.mp4](docs/demo.mp4). Akshay's ask on X → the 581 neatroots scenarios in the app → the live page → three of the 21 verified bugs → neatlogs incidents (a critical one it raised on its own from our traces, root cause and fix) and the `pkill` trace that made us block the command → Entire checkpoints and Graph → the cfo.ai plan.
@@ -124,4 +125,4 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - [x] neatlogs evidence (before/after traces, failure recovery run)
 - [x] Entire checkpoint link + ID — [`97c75579b386`](https://entire.io/gh/emreozyoruk/crashtest/commit/74641efd901999e96d69fd85f69dde70f3aa0a62)
 - [x] cfo.ai business plan — https://app.cfo.ai/s/--rWFPOxuMvaL0nN
-- [ ] Quote post of the official neatlogs submission post (Mon Oct 12, 06:30–11:25 PDT)
+- [x] Quote post of the official launch post — https://x.com/kurokotetsuyami/status/2109674985359053114
