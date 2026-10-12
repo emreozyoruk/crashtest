@@ -12,7 +12,7 @@ Give it a GitHub repo and it:
 
 Built during [neatHack](https://neatlogs.com/hackathon) (Oct 10–12, 2026). Build log: [hackathon.md](hackathon.md).
 
-> 🔴 **Live now:** [watch Crashtest test neatroots](http://34.238.91.131:8080) — every dot is one scenario; the yellow spark is the one being tried right now.
+> 🎬 **Demo (2:15):** [docs/demo.mp4](docs/demo.mp4) · **Live page:** [Crashtest's full neatroots run](http://34.238.91.131:8080) — every dot is one scenario, 581 of 581 done.
 
 ## neatlogs asked us to test their own product
 

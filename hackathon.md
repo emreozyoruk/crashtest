@@ -109,14 +109,17 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - 2026-10-10 cfo.ai business plan, unit costs from neatlogs traces: https://x.com/kurokotetsuyami/status/2109037159063953484
 
 ## Demo
-Pending.
+- 2:15 walkthrough, captioned: [docs/demo.mp4](docs/demo.mp4). Akshay's ask on X → the 581 neatroots scenarios in the app → the live page → three of the 21 verified bugs → neatlogs traces and detections → Entire checkpoints and Graph → the cfo.ai plan.
 
 ## Known limitations and next steps
-Pending.
+- Parallel runs averaged about 1.3× on a 2 GB server: long steering scenarios and model latency dominate. A bigger server or per-scenario sandboxes would scale it further.
+- Haiku runs ran out of steps on a few long scenarios (marked skipped with the reason); Sonnet finished them.
+- Per-scenario process cleanup by environment tag works on Linux only; macOS hides other processes' environments, so local runs rely on pid files.
+- Every bug in the neatroots report was checked by hand against the source; the false positives we found changed the runner's rules (see the report).
 
 ## Submission
 - [x] Public repo with commits dated during the hackathon
-- [ ] Demo video ≤ 3 min covering neatlogs, Entire and cfo.ai
+- [x] Demo video ≤ 3 min covering neatlogs, Entire and cfo.ai — [docs/demo.mp4](docs/demo.mp4)
 - [x] neatlogs evidence (before/after traces, failure recovery run)
 - [x] Entire checkpoint link + ID — [`97c75579b386`](https://entire.io/gh/emreozyoruk/crashtest/commit/74641efd901999e96d69fd85f69dde70f3aa0a62)
 - [x] cfo.ai business plan — https://app.cfo.ai/s/--rWFPOxuMvaL0nN
