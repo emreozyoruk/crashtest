@@ -107,6 +107,7 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - 2026-10-10 neatlogs caught our agent running `pkill` (and hiding it in its cleanup list); both closed: https://x.com/kurokotetsuyami/status/2108967648575066113
 - 2026-10-10 live page of Crashtest testing neatroots: http://34.238.91.131:8080
 - 2026-10-10 cfo.ai business plan, unit costs from neatlogs traces: https://x.com/kurokotetsuyami/status/2109037159063953484
+- 2026-10-11 the 21 verified neatroots bugs, filed upstream: https://github.com/neatlogs/neatroots/issues/23
 
 ## Demo
 - 2:15 walkthrough, captioned: [docs/demo.mp4](docs/demo.mp4). Akshay's ask on X → the 581 neatroots scenarios in the app → the live page → three of the 21 verified bugs → neatlogs traces and detections → Entire checkpoints and Graph → the cfo.ai plan.
