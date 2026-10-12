@@ -126,3 +126,4 @@ Problem: most bugs users hit are not in untested code, they are in paths nobody 
 - [x] Entire checkpoint link + ID — [`97c75579b386`](https://entire.io/gh/emreozyoruk/crashtest/commit/74641efd901999e96d69fd85f69dde70f3aa0a62)
 - [x] cfo.ai business plan — https://app.cfo.ai/s/--rWFPOxuMvaL0nN
 - [x] Quote post of the official launch post — https://x.com/kurokotetsuyami/status/2109674985359053114
+- [x] Submission form sent (2026-10-12, team Lovie, ID `5b9b408d-5f68-423a-aa4d-e334301b5985`)
